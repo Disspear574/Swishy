@@ -37,6 +37,7 @@ import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.media.DeleteResult
 import com.disspear574.swishy.media.MediaAsset
 import com.disspear574.swishy.media.MediaLibrary
+import com.disspear574.swishy.media.PhotoCard
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_back
 import com.disspear574.swishy.strings.a11y_restore
@@ -123,7 +124,7 @@ internal fun TrashScreen(
                             reloadToken += 1
                         },
                 ) {
-                    AssetImage(id = asset.id, modifier = Modifier.fillMaxSize())
+                    PhotoCard(id = asset.id, modifier = Modifier.fillMaxSize())
                 }
             }
         }

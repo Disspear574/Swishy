@@ -12,6 +12,7 @@ import platform.Foundation.valueForKey
 import platform.Photos.PHAccessLevelReadWrite
 import platform.Photos.PHAsset
 import platform.Photos.PHAssetChangeRequest
+import platform.Photos.PHAssetMediaSubtypePhotoLive
 import platform.Photos.PHAssetMediaTypeImage
 import platform.Photos.PHAssetMediaTypeVideo
 import platform.Photos.PHAssetResource
@@ -81,6 +82,7 @@ class IosMediaLibrary : MediaLibrary {
             takenAtMillis = ((asset.creationDate?.timeIntervalSince1970 ?: 0.0) * 1_000).toLong(),
             sizeBytes = asset.fileSizeBytes(),
             durationMillis = (asset.duration * 1_000).toLong().takeIf { isVideo },
+            isLive = asset.mediaSubtypes.toLong() and PHAssetMediaSubtypePhotoLive.toLong() != 0L,
         )
     }
 

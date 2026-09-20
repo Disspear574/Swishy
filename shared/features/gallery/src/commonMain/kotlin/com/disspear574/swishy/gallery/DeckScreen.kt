@@ -1,6 +1,9 @@
 package com.disspear574.swishy.gallery
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.input.pointer.pointerInput
 import com.disspear574.swishy.decisions.Decision
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.decisions.Deck
@@ -40,6 +44,7 @@ import com.disspear574.swishy.media.DeleteResult
 import com.disspear574.swishy.media.MediaKind
 import com.disspear574.swishy.media.MediaLibrary
 import com.disspear574.swishy.media.MonthKey
+import com.disspear574.swishy.media.PhotoCard
 import com.disspear574.swishy.media.VideoCard
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_back
@@ -50,6 +55,7 @@ import com.disspear574.swishy.strings.deck_keep
 import com.disspear574.swishy.strings.deck_progress
 import com.disspear574.swishy.strings.deck_trash
 import com.disspear574.swishy.strings.deck_undo
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 
@@ -67,6 +73,7 @@ internal fun DeckScreen(
     var reloadToken by remember(month) { mutableIntStateOf(0) }
     var outcome by remember(month) { mutableStateOf<DeleteResult?>(null) }
     var progress by remember(month) { mutableFloatStateOf(0f) }
+    var liveId by remember(month) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(month, reloadToken) { deck = Deck.of(library.assets(month), store) }
 
@@ -149,12 +156,27 @@ internal fun DeckScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(SwishyTheme.shapes.card)
-                        .background(colors.surfaceSunk),
+                        .background(colors.surfaceSunk)
+                        .then(
+                            if (item.isLive) {
+                                Modifier.holdToPlayLive(
+                                    key = item.id,
+                                    onChange = { held -> liveId = item.id.takeIf { held } },
+                                )
+                            } else {
+                                Modifier
+                            },
+                        ),
                 ) {
                     if (item.kind == MediaKind.VIDEO) {
                         VideoCard(id = item.id, modifier = Modifier.fillMaxSize())
                     } else {
-                        AssetImage(id = item.id, modifier = Modifier.fillMaxSize())
+                        PhotoCard(
+                            id = item.id,
+                            modifier = Modifier.fillMaxSize(),
+                            live = item.isLive,
+                            playingLive = liveId == item.id,
+                        )
                     }
                 }
             }
@@ -248,6 +270,21 @@ private fun DeckFinished(
         )
     }
 }
+
+private fun Modifier.holdToPlayLive(key: Any, onChange: (Boolean) -> Unit): Modifier =
+    pointerInput(key) {
+        awaitEachGesture {
+            awaitFirstDown(requireUnconsumed = false)
+            val released = withTimeoutOrNull(LIVE_HOLD_MILLIS) { waitForUpOrCancellation() }
+            if (released == null) {
+                onChange(true)
+                waitForUpOrCancellation()
+                onChange(false)
+            }
+        }
+    }
+
+private const val LIVE_HOLD_MILLIS = 350L
 
 private const val WASH_ALPHA = 0.28f
 

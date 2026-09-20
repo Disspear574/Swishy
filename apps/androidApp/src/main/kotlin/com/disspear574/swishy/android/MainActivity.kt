@@ -1,5 +1,7 @@
 package com.disspear574.swishy.android
 
+import android.content.pm.ActivityInfo
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +25,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        enableHighDynamicRange()
 
         val library = AndroidMediaLibrary(context = this, requestHost = requestHost)
         val component = retainedComponent { context -> GalleryComponent(context) }
@@ -35,6 +38,14 @@ class MainActivity : ComponentActivity() {
                 App(component = component, library = library, store = ready)
             }
         }
+    }
+}
+
+private fun ComponentActivity.enableHighDynamicRange() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return
+    val supported = display?.isHdr == true
+    if (supported) {
+        window.colorMode = ActivityInfo.COLOR_MODE_HDR
     }
 }
 

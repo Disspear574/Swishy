@@ -6,6 +6,7 @@ data class MediaAsset(
     val takenAtMillis: Long,
     val sizeBytes: Long,
     val durationMillis: Long?,
+    val isLive: Boolean = false,
 )
 
 enum class MediaKind { PHOTO, VIDEO }
