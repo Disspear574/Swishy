@@ -26,6 +26,8 @@ import com.disspear574.swishy.decisions.Decision
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.decisions.Deck
 import com.disspear574.swishy.decisions.formatSize
+import com.disspear574.swishy.designsystem.components.BackButton
+import com.disspear574.swishy.designsystem.components.HintBar
 import com.disspear574.swishy.designsystem.components.ProgressTrack
 import com.disspear574.swishy.designsystem.components.SwipeCard
 import com.disspear574.swishy.designsystem.components.SwipeVerdict
@@ -40,8 +42,10 @@ import com.disspear574.swishy.media.MediaLibrary
 import com.disspear574.swishy.media.MonthKey
 import com.disspear574.swishy.media.VideoCard
 import com.disspear574.swishy.strings.Res
-import com.disspear574.swishy.strings.deck_back
+import com.disspear574.swishy.strings.a11y_back
 import com.disspear574.swishy.strings.deck_finished
+import com.disspear574.swishy.strings.deck_hint_keep
+import com.disspear574.swishy.strings.deck_hint_trash
 import com.disspear574.swishy.strings.deck_keep
 import com.disspear574.swishy.strings.deck_progress
 import com.disspear574.swishy.strings.deck_trash
@@ -85,6 +89,11 @@ internal fun DeckScreen(
                 .padding(horizontal = spacing.screen, vertical = spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            BackButton(
+                onClick = onBack,
+                contentDescription = stringResource(Res.string.a11y_back),
+            )
+            Spacer(Modifier.width(spacing.medium))
             SwishyText(
                 text = month.displayName(),
                 style = SwishyTheme.typography.title,
@@ -97,7 +106,7 @@ internal fun DeckScreen(
                     current.decided + if (asset == null) 0 else 1,
                     current.total,
                 ),
-                style = SwishyTheme.typography.caption,
+                style = SwishyTheme.typography.numeric,
                 color = colors.inkDim,
             )
         }
@@ -113,7 +122,6 @@ internal fun DeckScreen(
                     deck = null
                     reloadToken += 1
                 },
-                onBack = onBack,
                 modifier = Modifier.weight(1f),
             )
             return@Column
@@ -122,7 +130,7 @@ internal fun DeckScreen(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = spacing.screen),
+                .padding(horizontal = spacing.screen, vertical = spacing.small),
         ) {
             SwipeCard(
                 key = asset.id,
@@ -159,28 +167,37 @@ internal fun DeckScreen(
                     null -> TrackMark.Pending
                 }
             },
-            modifier = Modifier.padding(horizontal = spacing.screen, vertical = spacing.medium),
+            modifier = Modifier.padding(horizontal = spacing.screen),
+        )
+
+        HintBar(
+            trashHint = stringResource(Res.string.deck_hint_trash),
+            keepHint = stringResource(Res.string.deck_hint_keep),
+            modifier = Modifier.padding(
+                horizontal = spacing.screen,
+                vertical = spacing.medium,
+            ),
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = spacing.screen, vertical = spacing.small),
-            horizontalArrangement = Arrangement.spacedBy(spacing.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             SwishyText(
                 text = formatSize(asset.sizeBytes).label(),
-                style = SwishyTheme.typography.label,
-                color = colors.inkDim,
+                style = SwishyTheme.typography.numeric,
+                color = colors.inkFaint,
                 modifier = Modifier.weight(1f),
             )
-            SwishyButton(
-                text = stringResource(Res.string.deck_undo),
-                tone = SwishyButtonTone.Quiet,
-                enabled = current.decided > 0,
-                onClick = { deck = current.undo() },
-            )
+            if (current.decided > 0) {
+                SwishyButton(
+                    text = stringResource(Res.string.deck_undo),
+                    tone = SwishyButtonTone.Quiet,
+                    onClick = { deck = current.undo() },
+                )
+            }
         }
 
         DeleteBar(
@@ -194,12 +211,6 @@ internal fun DeckScreen(
                 deck = null
                 reloadToken += 1
             },
-        )
-
-        SwishyButton(
-            text = stringResource(Res.string.deck_back),
-            tone = SwishyButtonTone.Quiet,
-            onClick = onBack,
             modifier = Modifier.padding(horizontal = spacing.screen, vertical = spacing.small),
         )
     }
@@ -212,7 +223,6 @@ private fun DeckFinished(
     outcome: DeleteResult?,
     onOutcome: (DeleteResult) -> Unit,
     onDeleted: (List<String>) -> Unit,
-    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val spacing = SwishyTheme.spacing
@@ -234,11 +244,6 @@ private fun DeckFinished(
             outcome = outcome,
             onOutcome = onOutcome,
             onDeleted = onDeleted,
-        )
-        SwishyButton(
-            text = stringResource(Res.string.deck_back),
-            tone = SwishyButtonTone.Quiet,
-            onClick = onBack,
         )
     }
 }

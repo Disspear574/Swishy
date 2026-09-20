@@ -22,7 +22,7 @@ internal fun AssetImage(id: String, modifier: Modifier = Modifier) {
             Image(
                 bitmap = image,
                 contentDescription = null,
-                contentScale = ContentScale.Fit,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
         }

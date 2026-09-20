@@ -54,4 +54,8 @@
 
     <string name="trash_caption">In trash · freed after deletion</string>
     <string name="delete_done_caption">Deleted</string>
+    <!-- Direction hint: explains the gesture before the first swipe, not after. -->
+    <string name="deck_hint_trash">← To trash</string>
+    <string name="deck_hint_keep">Keep →</string>
+    <string name="months_hero_caption">to review</string>
 </resources>

@@ -7,7 +7,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 
 private val LocalSwishyColors = staticCompositionLocalOf { LightColors }
-private val LocalSwishyTypography = staticCompositionLocalOf { swishyTypography() }
+private val LocalSwishyTypography = staticCompositionLocalOf<SwishyTypography?> { null }
 private val LocalSwishyShapes = staticCompositionLocalOf { SwishyShapes() }
 private val LocalSwishySpacing = staticCompositionLocalOf { SwishySpacing() }
 
@@ -35,7 +35,9 @@ object SwishyTheme {
     val typography: SwishyTypography
         @Composable
         @ReadOnlyComposable
-        get() = LocalSwishyTypography.current
+        get() = requireNotNull(LocalSwishyTypography.current) {
+            "SwishyTypography доступна только внутри SwishyTheme"
+        }
 
     val shapes: SwishyShapes
         @Composable

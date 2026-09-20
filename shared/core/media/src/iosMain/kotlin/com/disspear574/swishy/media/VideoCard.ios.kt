@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitViewController
 import kotlinx.cinterop.ExperimentalForeignApi
-import platform.AVFoundation.AVLayerVideoGravityResizeAspect
+import platform.AVFoundation.AVLayerVideoGravityResizeAspectFill
 import platform.AVFoundation.AVPlayer
 import platform.AVFoundation.AVPlayerItemDidPlayToEndTimeNotification
 import platform.AVFoundation.pause
@@ -65,7 +65,7 @@ actual fun VideoCard(id: String, modifier: Modifier) {
             AVPlayerViewController().apply {
                 this.player = player
                 showsPlaybackControls = false
-                videoGravity = AVLayerVideoGravityResizeAspect
+                videoGravity = AVLayerVideoGravityResizeAspectFill
             }
         },
         modifier = modifier,

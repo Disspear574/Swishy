@@ -1,7 +1,7 @@
 package com.disspear574.swishy.gallery
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,14 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.decisions.formatSize
 import com.disspear574.swishy.designsystem.components.EmptyState
+import com.disspear574.swishy.designsystem.components.HeroStat
 import com.disspear574.swishy.designsystem.components.MonthRow
 import com.disspear574.swishy.designsystem.components.StatLine
-import com.disspear574.swishy.designsystem.components.SwishyText
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.media.MediaLibrary
 import com.disspear574.swishy.media.MonthKey
@@ -52,25 +51,30 @@ internal fun MonthsScreen(
         return
     }
 
+    val totalCount = loaded.sumOf { it.count }
+    val totalBytes = loaded.sumOf { it.sizeBytes }
     val trashedBytes = store.trashedBytes()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+        contentPadding = PaddingValues(
             start = spacing.screen,
             end = spacing.screen,
-            top = spacing.medium,
+            top = spacing.small,
             bottom = spacing.huge,
         ),
         verticalArrangement = Arrangement.spacedBy(spacing.small),
     ) {
-        item(key = "title") {
-            Box(Modifier.padding(vertical = spacing.small), contentAlignment = Alignment.CenterStart) {
-                SwishyText(
-                    text = stringResource(Res.string.months_title),
-                    style = SwishyTheme.typography.title,
-                )
-            }
+        item(key = "hero") {
+            HeroStat(
+                eyebrow = stringResource(Res.string.months_title),
+                value = formatSize(totalBytes).label(),
+                caption = stringResource(Res.string.months_undecided, totalCount),
+                modifier = Modifier.padding(
+                    top = spacing.medium,
+                    bottom = spacing.medium,
+                ),
+            )
         }
 
         if (trashedBytes > 0) {
@@ -89,7 +93,11 @@ internal fun MonthsScreen(
                 subtitle = stringResource(Res.string.months_undecided, summary.count),
                 size = formatSize(summary.sizeBytes).label(),
                 onClick = { onOpen(summary.month) },
-                contentDescription = stringResource(Res.string.a11y_open_month, title, summary.count),
+                contentDescription = stringResource(
+                    Res.string.a11y_open_month,
+                    title,
+                    summary.count,
+                ),
             )
         }
     }

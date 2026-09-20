@@ -13,6 +13,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 
 @OptIn(UnstableApi::class)
@@ -48,6 +49,7 @@ actual fun VideoCard(id: String, modifier: Modifier) {
         factory = { viewContext ->
             PlayerView(viewContext).apply {
                 useController = false
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                 isClickable = false
                 isFocusable = false
                 setOnTouchListener { _, _ -> false }

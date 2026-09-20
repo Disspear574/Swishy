@@ -54,7 +54,7 @@ fun MonthRow(
             Spacer(Modifier.width(spacing.medium))
             SwishyText(
                 text = size,
-                style = SwishyTheme.typography.label,
+                style = SwishyTheme.typography.numeric,
                 color = if (done) colors.inkFaint else colors.inkDim,
             )
         }
