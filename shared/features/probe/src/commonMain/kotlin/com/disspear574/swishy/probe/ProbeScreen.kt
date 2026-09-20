@@ -87,7 +87,7 @@ private fun PermissionGate(onGrant: () -> Unit) {
     ) {
         ProbeText(stringResource(Res.string.permission_title))
         Spacer(Modifier.height(8.dp))
-        ProbeText(stringResource(Res.string.permission_body))
+        ProbeText(text = stringResource(Res.string.permission_body), maxLines = 6)
         Spacer(Modifier.height(16.dp))
         ProbeButton(text = stringResource(Res.string.permission_grant), onClick = onGrant)
     }
@@ -105,7 +105,7 @@ private fun MonthsList(
     val loaded = months ?: return
     if (loaded.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            ProbeText(stringResource(Res.string.months_empty))
+            ProbeText(text = stringResource(Res.string.months_empty), maxLines = 3)
         }
         return
     }

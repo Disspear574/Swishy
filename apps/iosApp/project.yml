@@ -1,0 +1,44 @@
+name: Swishy
+options:
+  bundleIdPrefix: com.disspear574.swishy
+  deploymentTarget:
+    iOS: "16.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    KOTLIN_TARGET: iosArm64
+    "KOTLIN_TARGET[sdk=iphonesimulator*]": iosSimulatorArm64
+    "ARCHS[sdk=iphonesimulator*]": arm64
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGNING_ALLOWED: "NO"
+  configs:
+    Debug:
+      KOTLIN_FRAMEWORK_DIR: debugFramework
+    Release:
+      KOTLIN_FRAMEWORK_DIR: releaseFramework
+
+targets:
+  Swishy:
+    type: application
+    platform: iOS
+    sources:
+      - Swishy
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.disspear574.swishy
+        INFOPLIST_FILE: Swishy/Info.plist
+        FRAMEWORK_SEARCH_PATHS:
+          - $(inherited)
+          - $(SRCROOT)/../../shared/app/build/xcode-frameworks/$(KOTLIN_FRAMEWORK_DIR)/$(KOTLIN_TARGET)
+        OTHER_LDFLAGS:
+          - $(inherited)
+          - -framework
+          - SwishyKit
+    preBuildScripts:
+      - name: Build Kotlin framework
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/../.."
+          ./gradlew :shared:app:embedAndSignAppleFrameworkForXcode
