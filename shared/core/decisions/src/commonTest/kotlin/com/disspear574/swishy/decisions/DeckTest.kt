@@ -84,6 +84,29 @@ class DeckTest {
     }
 
     @Test
+    fun `история решений пуста в начале и вся из null`() {
+        assertEquals(listOf(null, null, null), Deck.of(three, InMemoryDecisionStore()).timeline())
+    }
+
+    @Test
+    fun `история хранит решения в порядке принятия`() {
+        val deck = Deck.of(three, InMemoryDecisionStore())
+            .decide(Decision.TRASHED)
+            .decide(Decision.KEPT)
+
+        assertEquals(listOf(Decision.TRASHED, Decision.KEPT, null), deck.timeline())
+    }
+
+    @Test
+    fun `отмена убирает решение из истории`() {
+        val deck = Deck.of(three, InMemoryDecisionStore())
+            .decide(Decision.TRASHED)
+            .undo()
+
+        assertEquals(listOf(null, null, null), deck.timeline())
+    }
+
+    @Test
     fun `общее число кадров не меняется от решений`() {
         val deck = Deck.of(three, InMemoryDecisionStore())
 

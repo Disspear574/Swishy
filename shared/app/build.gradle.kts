@@ -17,7 +17,8 @@ kotlin {
             implementation(libs.bundles.compose.common)
             api(projects.shared.core.media)
             api(projects.shared.core.decisions)
-            implementation(projects.shared.features.probe)
+            implementation(projects.shared.features.gallery)
+            implementation(projects.shared.designSystem)
         }
     }
 }

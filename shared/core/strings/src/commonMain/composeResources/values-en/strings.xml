@@ -29,4 +29,29 @@
     <string name="delete_done_body">Space is freed once the system “Recently Deleted” album is emptied. You can empty it now.</string>
     <string name="delete_open_recently_deleted">Open “Recently Deleted”</string>
     <string name="delete_failed">Couldn’t delete: %1$s</string>
+    <!-- Month names: the «2026-9» label read as a part number, not a month. -->
+    <string name="month_1">January</string>
+    <string name="month_2">February</string>
+    <string name="month_3">March</string>
+    <string name="month_4">April</string>
+    <string name="month_5">May</string>
+    <string name="month_6">June</string>
+    <string name="month_7">July</string>
+    <string name="month_8">August</string>
+    <string name="month_9">September</string>
+    <string name="month_10">October</string>
+    <string name="month_11">November</string>
+    <string name="month_12">December</string>
+
+    <string name="month_with_year">%1$s %2$d</string>
+
+    <string name="deck_keep">Keep</string>
+    <string name="deck_trash">To trash</string>
+
+    <string name="a11y_open_month">%1$s, %2$d to review, open</string>
+    <string name="a11y_undo">Undo the last decision</string>
+    <string name="a11y_back">Back to the month list</string>
+
+    <string name="trash_caption">In trash · freed after deletion</string>
+    <string name="delete_done_caption">Deleted</string>
 </resources>

@@ -6,12 +6,13 @@ plugins {
 
 kotlin {
     android {
-        namespace = "com.disspear574.swishy.probe"
+        namespace = "com.disspear574.swishy.gallery"
     }
 
     sourceSets {
         commonDependencies {
             implementation(libs.bundles.compose.common)
+            implementation(projects.shared.designSystem)
             implementation(projects.shared.core.strings)
             api(projects.shared.core.media)
             api(projects.shared.core.decisions)

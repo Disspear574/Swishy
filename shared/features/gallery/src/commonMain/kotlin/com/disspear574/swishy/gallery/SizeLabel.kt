@@ -1,4 +1,4 @@
-package com.disspear574.swishy.probe
+package com.disspear574.swishy.gallery
 
 import androidx.compose.runtime.Composable
 import com.disspear574.swishy.decisions.SizeText

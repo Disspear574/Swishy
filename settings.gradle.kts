@@ -20,9 +20,10 @@ include(":apps:androidApp")
 
 include(":shared:app")
 
+include(":shared:design-system")
 include(":shared:core:strings")
 
 include(":shared:core:media")
 include(":shared:core:decisions")
 
-include(":shared:features:probe")
+include(":shared:features:gallery")

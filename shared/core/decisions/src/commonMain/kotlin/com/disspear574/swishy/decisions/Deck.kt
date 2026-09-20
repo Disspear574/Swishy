@@ -16,6 +16,9 @@ class Deck private constructor(
 
     val total: Int get() = pending.size + history.size
 
+    fun timeline(): List<Decision?> =
+        history.map { asset -> store.decisionOf(asset.id) } + List(pending.size) { null }
+
     fun decide(decision: Decision): Deck {
         val asset = current ?: return this
         store.record(id = asset.id, decision = decision, sizeBytes = asset.sizeBytes)

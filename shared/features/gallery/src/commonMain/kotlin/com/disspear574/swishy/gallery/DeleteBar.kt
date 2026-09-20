@@ -1,10 +1,8 @@
-package com.disspear574.swishy.probe
+package com.disspear574.swishy.gallery
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,15 +10,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.disspear574.swishy.decisions.formatSize
+import com.disspear574.swishy.designsystem.components.StatLine
+import com.disspear574.swishy.designsystem.components.SwishyButton
+import com.disspear574.swishy.designsystem.components.SwishyButtonTone
+import com.disspear574.swishy.designsystem.components.SwishyText
+import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.media.DeleteResult
 import com.disspear574.swishy.media.MediaLibrary
 import com.disspear574.swishy.media.openSystemTrash
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.delete_cancelled
 import com.disspear574.swishy.strings.delete_done_body
-import com.disspear574.swishy.strings.delete_done_title
+import com.disspear574.swishy.strings.delete_done_caption
 import com.disspear574.swishy.strings.delete_failed
 import com.disspear574.swishy.strings.delete_open_recently_deleted
 import com.disspear574.swishy.strings.trash_delete
@@ -37,12 +39,16 @@ internal fun DeleteBar(
     onDeleted: (List<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val spacing = SwishyTheme.spacing
     val scope = rememberCoroutineScope()
     var inFlight by remember { mutableStateOf(false) }
 
-    Column(modifier.fillMaxWidth().padding(16.dp)) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(spacing.small),
+    ) {
         if (trashedIds.isNotEmpty()) {
-            ProbeButton(
+            SwishyButton(
                 text = stringResource(
                     Res.string.trash_delete,
                     trashedIds.size,
@@ -60,6 +66,7 @@ internal fun DeleteBar(
                         inFlight = false
                     }
                 },
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 
@@ -67,25 +74,34 @@ internal fun DeleteBar(
             null -> Unit
 
             is DeleteResult.Deleted -> {
-                Spacer(Modifier.height(8.dp))
-                ProbeText(
-                    text = stringResource(
-                        Res.string.delete_done_title,
-                        formatSize(result.freedBytes).label(),
-                    ),
+                StatLine(
+                    value = formatSize(result.freedBytes).label(),
+                    caption = stringResource(Res.string.delete_done_caption),
                 )
-                ProbeText(text = stringResource(Res.string.delete_done_body), maxLines = 4)
-                Spacer(Modifier.height(8.dp))
-                ProbeButton(
+                SwishyText(
+                    text = stringResource(Res.string.delete_done_body),
+                    style = SwishyTheme.typography.caption,
+                    color = SwishyTheme.colors.inkDim,
+                    maxLines = Int.MAX_VALUE,
+                )
+                SwishyButton(
                     text = stringResource(Res.string.delete_open_recently_deleted),
+                    tone = SwishyButtonTone.Quiet,
                     onClick = { openSystemTrash() },
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 
-            DeleteResult.Cancelled -> ProbeText(stringResource(Res.string.delete_cancelled))
+            DeleteResult.Cancelled -> SwishyText(
+                text = stringResource(Res.string.delete_cancelled),
+                style = SwishyTheme.typography.caption,
+                color = SwishyTheme.colors.inkDim,
+            )
 
-            is DeleteResult.Failed -> ProbeText(
+            is DeleteResult.Failed -> SwishyText(
                 text = stringResource(Res.string.delete_failed, result.reason),
+                style = SwishyTheme.typography.caption,
+                color = SwishyTheme.colors.trash,
                 maxLines = 3,
             )
         }
