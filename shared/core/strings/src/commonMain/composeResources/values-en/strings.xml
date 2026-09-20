@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Swishy</string>
+
+    <string name="unit_bytes">B</string>
+    <string name="unit_kilobytes">KB</string>
+    <string name="unit_megabytes">MB</string>
+    <string name="unit_gigabytes">GB</string>
+
+    <string name="months_title">Gallery</string>
+    <string name="months_undecided">%1$d to review</string>
+    <string name="months_done">Reviewed</string>
+    <string name="months_empty">No photos or videos in your gallery</string>
+
+    <string name="trash_banner">In trash %1$s · %2$s</string>
+    <string name="trash_delete">Delete %1$d · %2$s</string>
+
+    <string name="deck_progress">%1$d of %2$d</string>
+    <string name="deck_undo">Undo last</string>
+    <string name="deck_finished">Month reviewed</string>
+    <string name="deck_back">Back</string>
+    <string name="deck_open">Open</string>
+
+    <string name="permission_title">Photo access needed</string>
+    <string name="permission_body">Swishy shows your photos one at a time so you can decide what to keep. Nothing is uploaded: the app never connects to the internet.</string>
+    <string name="permission_grant">Allow</string>
+
+    <string name="delete_cancelled">Deletion cancelled</string>
+    <string name="delete_done_title">Deleted %1$s</string>
+    <string name="delete_done_body">Space is freed once the system “Recently Deleted” album is emptied. You can empty it now.</string>
+    <string name="delete_open_recently_deleted">Open “Recently Deleted”</string>
+    <string name="delete_failed">Couldn’t delete: %1$s</string>
+</resources>

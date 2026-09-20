@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Swishy</string>
+
+    <string name="unit_bytes">Б</string>
+    <string name="unit_kilobytes">КБ</string>
+    <string name="unit_megabytes">МБ</string>
+    <string name="unit_gigabytes">ГБ</string>
+
+    <string name="months_title">Галерея</string>
+    <string name="months_undecided">%1$d не разобрано</string>
+    <string name="months_done">Разобрано</string>
+    <string name="months_empty">В галерее нет фото и видео</string>
+
+    <string name="trash_banner">В корзине %1$s · %2$s</string>
+    <string name="trash_delete">Удалить %1$d · %2$s</string>
+
+    <string name="deck_progress">%1$d из %2$d</string>
+    <string name="deck_undo">Вернуть последнее</string>
+    <string name="deck_finished">Месяц разобран</string>
+    <string name="deck_back">Назад</string>
+    <string name="deck_open">Открыть</string>
+
+    <string name="permission_title">Нужен доступ к фото</string>
+    <string name="permission_body">Swishy показывает ваши фото по одному, чтобы вы решили, что оставить. Фото никуда не отправляются: приложение не выходит в интернет.</string>
+    <string name="permission_grant">Разрешить</string>
+
+    <string name="delete_cancelled">Удаление отменено</string>
+    <string name="delete_done_title">Удалено %1$s</string>
+    <string name="delete_done_body">Место освободится, когда опустеет системная корзина «Недавно удалённые». Её можно опустошить прямо сейчас.</string>
+    <string name="delete_open_recently_deleted">Открыть «Недавно удалённые»</string>
+    <string name="delete_failed">Не удалось удалить: %1$s</string>
+</resources>
