@@ -1,0 +1,51 @@
+# Additions to the detekt defaults; the defaults apply to everything not listed here.
+build:
+  maxIssues: 0
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+    excludes: ['**/*Test/**']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][_A-Za-z0-9]*'
+  MatchingDeclarationName:
+    active: false
+
+complexity:
+  LongParameterList:
+    ignoreAnnotated: ['Composable']
+  LongMethod:
+    ignoreAnnotated: ['Composable']
+  CyclomaticComplexMethod:
+    ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    ignoreAnnotatedFunctions: ['Composable']
+    excludes: ['**/*Test/**']
+
+style:
+  MagicNumber:
+    ignoreAnnotated: ['Composable']
+    ignorePropertyDeclaration: true
+    excludes: ['**/designsystem/theme/**', '**/*Test/**']
+  ReturnCount:
+    excludeGuardClauses: true
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']
+  ForbiddenComment:
+    active: false
+  MaxLineLength:
+    maxLineLength: 120
+    excludes: ['**/*Test/**']
+  # Screens build on the design system; Material stays out of the app.
+  ForbiddenImport:
+    active: true
+    imports:
+      - value: 'androidx.compose.material3.**'
+        reason: 'Use the Swishy design system components'
+      - value: 'androidx.compose.material.**'
+        reason: 'Use the Swishy design system components'
+
+formatting:
+  active: true
+  MaximumLineLength:
+    active: false
