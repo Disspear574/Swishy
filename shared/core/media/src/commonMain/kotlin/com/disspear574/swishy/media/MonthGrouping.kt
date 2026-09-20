@@ -1,9 +1,9 @@
 package com.disspear574.swishy.media
 
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 fun MediaAsset.monthKeyIn(timeZone: TimeZone): MonthKey {
     val local = Instant.fromEpochMilliseconds(takenAtMillis).toLocalDateTime(timeZone)

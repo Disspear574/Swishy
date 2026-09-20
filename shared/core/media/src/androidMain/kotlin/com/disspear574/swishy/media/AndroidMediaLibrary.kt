@@ -51,7 +51,7 @@ class AndroidMediaLibrary(
             columns,
             selection,
             selectionArgs,
-            "${MediaStore.Files.FileColumns.DATE_TAKEN} DESC",
+            null,
         )?.use { cursor ->
             val idIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
             val typeIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
@@ -77,19 +77,29 @@ class AndroidMediaLibrary(
                 )
             }
         }
-        assets
+        assets.sortedByDescending { it.takenAtMillis }
     }
 
+    @Suppress("ReturnCount")
     override suspend fun delete(ids: List<String>): DeleteResult {
         if (ids.isEmpty()) return DeleteResult.Deleted(ids = emptyList(), freedBytes = 0)
 
-        val freedBytes = readAll().filter { it.id in ids }.sumOf { it.sizeBytes }
-        val uris = ids.mapNotNull { id ->
-            id.toLongOrNull()?.let { numeric -> ContentUris.withAppendedId(collection, numeric) }
-        }
-        if (uris.isEmpty()) return DeleteResult.Failed(reason = "no valid ids")
+        val known = readAll().filter { it.id in ids }
+        val freedBytes = known.sumOf { it.sizeBytes }
 
-        val request = MediaStore.createTrashRequest(context.contentResolver, uris, true)
+        val uris = known.mapNotNull { asset ->
+            asset.id.toLongOrNull()?.let { numeric ->
+                ContentUris.withAppendedId(asset.kind.collectionUri(), numeric)
+            }
+        }
+        if (uris.isEmpty()) return DeleteResult.Failed(reason = "no media items")
+
+        val request = withContext(Dispatchers.IO) {
+            runCatching { MediaStore.createTrashRequest(context.contentResolver, uris, true) }
+        }.getOrElse { error ->
+            return DeleteResult.Failed(reason = error.message ?: "trash request failed")
+        }
+
         val confirmed = requestHost.launch(request.intentSender)
 
         return if (confirmed) {
@@ -97,6 +107,11 @@ class AndroidMediaLibrary(
         } else {
             DeleteResult.Cancelled
         }
+    }
+
+    private fun MediaKind.collectionUri() = when (this) {
+        MediaKind.PHOTO -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        MediaKind.VIDEO -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
     }
 
     private companion object {

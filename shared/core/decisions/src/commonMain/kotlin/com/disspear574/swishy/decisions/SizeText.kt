@@ -8,6 +8,8 @@ data class SizeText(val value: String, val unit: SizeUnit)
 
 private const val STEP = 1024.0
 
+private const val TENTHS = 10
+
 fun formatSize(bytes: Long): SizeText {
     if (bytes <= 0) return SizeText(value = "0", unit = SizeUnit.BYTES)
 
@@ -24,8 +26,8 @@ fun formatSize(bytes: Long): SizeText {
 }
 
 private fun oneDecimal(value: Double): String {
-    val tenths = round(value * 10).toLong()
-    val whole = tenths / 10
-    val fraction = tenths % 10
+    val tenths = round(value * TENTHS).toLong()
+    val whole = tenths / TENTHS
+    val fraction = tenths % TENTHS
     return if (fraction == 0L) whole.toString() else "$whole,$fraction"
 }

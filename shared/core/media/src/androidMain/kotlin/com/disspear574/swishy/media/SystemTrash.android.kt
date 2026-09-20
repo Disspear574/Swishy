@@ -12,6 +12,6 @@ actual fun openSystemTrash() {
     }
     try {
         context.startActivity(intent)
-    } catch (error: ActivityNotFoundException) {
+    } catch (@Suppress("SwallowedException") ignored: ActivityNotFoundException) {
     }
 }

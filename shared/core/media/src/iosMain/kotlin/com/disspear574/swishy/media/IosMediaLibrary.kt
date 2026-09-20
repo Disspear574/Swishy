@@ -1,6 +1,5 @@
 package com.disspear574.swishy.media
 
-import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.datetime.TimeZone
 import platform.Foundation.NSMutableArray
@@ -22,6 +21,7 @@ import platform.Photos.PHAuthorizationStatusLimited
 import platform.Photos.PHAuthorizationStatusNotDetermined
 import platform.Photos.PHFetchOptions
 import platform.Photos.PHPhotoLibrary
+import kotlin.coroutines.resume
 
 class IosMediaLibrary : MediaLibrary {
 

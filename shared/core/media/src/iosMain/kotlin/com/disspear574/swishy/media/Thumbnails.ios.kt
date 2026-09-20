@@ -2,7 +2,6 @@ package com.disspear574.swishy.media
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import kotlin.coroutines.resume
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
@@ -18,7 +17,9 @@ import platform.Photos.PHImageRequestOptionsDeliveryModeHighQualityFormat
 import platform.UIKit.UIImage
 import platform.UIKit.UIImageJPEGRepresentation
 import platform.posix.memcpy
+import kotlin.coroutines.resume
 
+@Suppress("ReturnCount")
 @OptIn(ExperimentalForeignApi::class)
 actual suspend fun loadThumbnail(id: String, widthPx: Int, heightPx: Int): ImageBitmap? {
     val asset = PHAsset.fetchAssetsWithLocalIdentifiers(listOf(id), null)
