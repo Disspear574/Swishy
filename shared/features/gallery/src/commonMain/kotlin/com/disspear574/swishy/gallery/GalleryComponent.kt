@@ -9,6 +9,7 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
 
+@OptIn(com.arkivanov.decompose.DelicateDecomposeApi::class)
 class GalleryComponent(componentContext: ComponentContext) : ComponentContext by componentContext {
 
     private val navigation = StackNavigation<Config>()
@@ -21,6 +22,7 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
         childFactory = { config, _ ->
             when (config) {
                 Config.Months -> Child.Months
+                Config.Trash -> Child.Trash
                 is Config.Deck -> Child.Deck(config.month)
             }
         },
@@ -30,17 +32,23 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
         navigation.push(Config.Deck(month))
     }
 
+    fun openTrash() {
+        navigation.push(Config.Trash)
+    }
+
     fun back() {
         navigation.pop()
     }
 
     sealed interface Config {
         data object Months : Config
+        data object Trash : Config
         data class Deck(val month: MonthKey) : Config
     }
 
     sealed interface Child {
         data object Months : Child
+        data object Trash : Child
         data class Deck(val month: MonthKey) : Child
     }
 }

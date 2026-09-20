@@ -58,4 +58,9 @@
     <string name="deck_hint_trash">← To trash</string>
     <string name="deck_hint_keep">Keep →</string>
     <string name="months_hero_caption">to review</string>
+    <string name="trash_title">Trash</string>
+    <string name="trash_empty">Nothing marked yet. A swipe left puts a frame here.</string>
+    <string name="trash_restore_hint">Tap a frame to put it back in the deck</string>
+    <string name="a11y_restore">Put the frame back in the deck</string>
+    <string name="a11y_open_trash">Open the trash</string>
 </resources>

@@ -30,12 +30,16 @@ class AndroidMediaLibrary(
         return MediaPermissions.state(context)
     }
 
-    override suspend fun months(): List<MonthSummary> =
-        readAll().groupIntoMonths(TimeZone.currentSystemDefault())
+    override suspend fun allAssets(): List<MediaAsset> = readAll()
 
     override suspend fun assets(month: MonthKey): List<MediaAsset> {
         val zone = TimeZone.currentSystemDefault()
         return readAll().filter { asset -> asset.monthKeyIn(zone) == month }
+    }
+
+    override suspend fun assets(ids: List<String>): List<MediaAsset> {
+        val byId = readAll().associateBy { it.id }
+        return ids.mapNotNull(byId::get)
     }
 
     private suspend fun readAll(): List<MediaAsset> = withContext(Dispatchers.IO) {

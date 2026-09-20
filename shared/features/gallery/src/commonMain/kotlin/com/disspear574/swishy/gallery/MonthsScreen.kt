@@ -23,12 +23,15 @@ import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.media.MediaLibrary
 import com.disspear574.swishy.media.MonthKey
 import com.disspear574.swishy.media.MonthSummary
+import com.disspear574.swishy.media.groupIntoMonths
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_open_month
+import com.disspear574.swishy.strings.a11y_open_trash
 import com.disspear574.swishy.strings.months_empty
 import com.disspear574.swishy.strings.months_title
 import com.disspear574.swishy.strings.months_undecided
 import com.disspear574.swishy.strings.trash_caption
+import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -36,10 +39,15 @@ internal fun MonthsScreen(
     library: MediaLibrary,
     store: DecisionStore,
     onOpen: (MonthKey) -> Unit,
+    onOpenTrash: () -> Unit,
 ) {
     val spacing = SwishyTheme.spacing
     var months by remember { mutableStateOf<List<MonthSummary>?>(null) }
-    LaunchedEffect(Unit) { months = library.months() }
+    LaunchedEffect(Unit) {
+        months = library.allAssets()
+            .filter { asset -> store.decisionOf(asset.id) == null }
+            .groupIntoMonths(TimeZone.currentSystemDefault())
+    }
 
     val loaded = months ?: return
 
@@ -82,6 +90,8 @@ internal fun MonthsScreen(
                 StatLine(
                     value = formatSize(trashedBytes).label(),
                     caption = stringResource(Res.string.trash_caption),
+                    onClick = onOpenTrash,
+                    contentDescription = stringResource(Res.string.a11y_open_trash),
                 )
             }
         }

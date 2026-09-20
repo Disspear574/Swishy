@@ -93,6 +93,13 @@ private fun GalleryStack(
                     library = library,
                     store = store,
                     onOpen = component::openMonth,
+                    onOpenTrash = component::openTrash,
+                )
+
+                GalleryComponent.Child.Trash -> TrashScreen(
+                    library = library,
+                    store = store,
+                    onBack = component::back,
                 )
 
                 is GalleryComponent.Child.Deck -> DeckScreen(

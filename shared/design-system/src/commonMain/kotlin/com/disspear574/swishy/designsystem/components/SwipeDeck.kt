@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -157,6 +158,10 @@ private fun TopCard(
     val colors = SwishyTheme.colors
     val verdictColor = if (progress >= 0f) colors.keep else colors.trash
 
+    val currentDrag by rememberUpdatedState(onDrag)
+    val currentRelease by rememberUpdatedState(onRelease)
+    val currentWidth by rememberUpdatedState(onWidth)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -170,11 +175,11 @@ private fun TopCard(
             }
             .clip(SwishyTheme.shapes.card)
             .pointerInput(Unit) {
-                onWidth(size.width.toFloat())
+                currentWidth(size.width.toFloat())
                 detectHorizontalDragGestures(
-                    onDragEnd = onRelease,
-                    onDragCancel = onRelease,
-                    onHorizontalDrag = { _, amount -> onDrag(amount) },
+                    onDragEnd = { currentRelease() },
+                    onDragCancel = { currentRelease() },
+                    onHorizontalDrag = { _, amount -> currentDrag(amount) },
                 )
             }
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }

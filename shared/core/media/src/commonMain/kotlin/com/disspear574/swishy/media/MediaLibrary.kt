@@ -6,9 +6,11 @@ interface MediaLibrary {
 
     suspend fun requestPermission(): PermissionState
 
-    suspend fun months(): List<MonthSummary>
+    suspend fun allAssets(): List<MediaAsset>
 
     suspend fun assets(month: MonthKey): List<MediaAsset>
+
+    suspend fun assets(ids: List<String>): List<MediaAsset>
 
     suspend fun delete(ids: List<String>): DeleteResult
 }
