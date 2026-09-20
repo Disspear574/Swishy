@@ -16,6 +16,8 @@ class Deck private constructor(
 
     val total: Int get() = pending.size + history.size
 
+    fun upcoming(count: Int): List<MediaAsset> = pending.take(count)
+
     fun timeline(): List<Decision?> =
         history.map { asset -> store.decisionOf(asset.id) } + List(pending.size) { null }
 

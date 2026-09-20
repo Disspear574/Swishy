@@ -84,6 +84,20 @@ class DeckTest {
     }
 
     @Test
+    fun `ближайшие кадры начинаются с текущего`() {
+        val deck = Deck.of(three, InMemoryDecisionStore())
+
+        assertEquals(listOf("a", "b", "c"), deck.upcoming(3).map { it.id })
+    }
+
+    @Test
+    fun `ближайших не больше, чем осталось`() {
+        val deck = Deck.of(three, InMemoryDecisionStore()).decide(Decision.KEPT)
+
+        assertEquals(listOf("b", "c"), deck.upcoming(5).map { it.id })
+    }
+
+    @Test
     fun `история решений пуста в начале и вся из null`() {
         assertEquals(listOf(null, null, null), Deck.of(three, InMemoryDecisionStore()).timeline())
     }

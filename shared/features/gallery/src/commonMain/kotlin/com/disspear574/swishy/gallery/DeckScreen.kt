@@ -29,7 +29,7 @@ import com.disspear574.swishy.decisions.formatSize
 import com.disspear574.swishy.designsystem.components.BackButton
 import com.disspear574.swishy.designsystem.components.HintBar
 import com.disspear574.swishy.designsystem.components.ProgressTrack
-import com.disspear574.swishy.designsystem.components.SwipeCard
+import com.disspear574.swishy.designsystem.components.SwipeDeck
 import com.disspear574.swishy.designsystem.components.SwipeVerdict
 import com.disspear574.swishy.designsystem.components.SwishyButton
 import com.disspear574.swishy.designsystem.components.SwishyButtonTone
@@ -132,28 +132,29 @@ internal fun DeckScreen(
                 .weight(1f)
                 .padding(horizontal = spacing.screen, vertical = spacing.small),
         ) {
-            SwipeCard(
-                key = asset.id,
+            SwipeDeck(
+                items = current.upcoming(DECK_DEPTH),
+                key = { it.id },
                 keepLabel = stringResource(Res.string.deck_keep),
                 trashLabel = stringResource(Res.string.deck_trash),
-                onVerdict = { verdict ->
+                onVerdict = { _, verdict ->
                     progress = 0f
                     deck = current.decide(
                         if (verdict == SwipeVerdict.Keep) Decision.KEPT else Decision.TRASHED,
                     )
                 },
                 onProgressChange = { value -> progress = value },
-            ) {
+            ) { item ->
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(SwishyTheme.shapes.card)
                         .background(colors.surfaceSunk),
                 ) {
-                    if (asset.kind == MediaKind.VIDEO) {
-                        VideoCard(id = asset.id, modifier = Modifier.fillMaxSize())
+                    if (item.kind == MediaKind.VIDEO) {
+                        VideoCard(id = item.id, modifier = Modifier.fillMaxSize())
                     } else {
-                        AssetImage(id = asset.id, modifier = Modifier.fillMaxSize())
+                        AssetImage(id = item.id, modifier = Modifier.fillMaxSize())
                     }
                 }
             }
@@ -249,3 +250,5 @@ private fun DeckFinished(
 }
 
 private const val WASH_ALPHA = 0.28f
+
+private const val DECK_DEPTH = 3

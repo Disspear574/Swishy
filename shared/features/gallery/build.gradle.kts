@@ -12,6 +12,7 @@ kotlin {
     sourceSets {
         commonDependencies {
             implementation(libs.bundles.compose.common)
+            api(libs.bundles.decompose.full)
             implementation(projects.shared.designSystem)
             implementation(projects.shared.core.strings)
             api(projects.shared.core.media)

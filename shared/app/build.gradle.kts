@@ -15,9 +15,10 @@ kotlin {
     sourceSets {
         commonDependencies {
             implementation(libs.bundles.compose.common)
+            api(libs.bundles.decompose.full)
             api(projects.shared.core.media)
             api(projects.shared.core.decisions)
-            implementation(projects.shared.features.gallery)
+            api(projects.shared.features.gallery)
             implementation(projects.shared.designSystem)
         }
     }

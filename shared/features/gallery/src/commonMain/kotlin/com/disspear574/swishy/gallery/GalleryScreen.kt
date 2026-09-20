@@ -1,5 +1,6 @@
 package com.disspear574.swishy.gallery
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,54 +16,95 @@ import androidx.compose.ui.Modifier
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.designsystem.components.EmptyState
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
+import com.disspear574.swishy.designsystem.theme.isReduceMotionEnabled
 import com.disspear574.swishy.media.MediaLibrary
-import com.disspear574.swishy.media.MonthKey
 import com.disspear574.swishy.media.PermissionState
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.permission_body
 import com.disspear574.swishy.strings.permission_grant
 import com.disspear574.swishy.strings.permission_title
+import com.arkivanov.decompose.extensions.compose.stack.Children
+import com.arkivanov.decompose.extensions.compose.stack.animation.fade
+import com.arkivanov.decompose.extensions.compose.stack.animation.plus
+import com.arkivanov.decompose.extensions.compose.stack.animation.slide
+import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun GalleryScreen(library: MediaLibrary, store: DecisionStore) {
+fun GalleryScreen(
+    component: GalleryComponent,
+    library: MediaLibrary,
+    store: DecisionStore,
+) {
     val scope = rememberCoroutineScope()
     var permission by remember { mutableStateOf<PermissionState?>(null) }
-    var openMonth by remember { mutableStateOf<MonthKey?>(null) }
 
     LaunchedEffect(Unit) { permission = library.permissionState() }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SwishyTheme.colors.ground)
-            .safeDrawingPadding(),
+            .background(SwishyTheme.colors.ground),
     ) {
         val state = permission
-        val month = openMonth
         when {
             state == null -> Unit
 
-            state != PermissionState.GRANTED && state != PermissionState.LIMITED -> EmptyState(
-                title = stringResource(Res.string.permission_title),
-                body = stringResource(Res.string.permission_body),
-                actionLabel = stringResource(Res.string.permission_grant),
-                onAction = { scope.launch { permission = library.requestPermission() } },
-            )
+            state != PermissionState.GRANTED && state != PermissionState.LIMITED -> Box(
+                Modifier.fillMaxSize().safeDrawingPadding(),
+            ) {
+                EmptyState(
+                    title = stringResource(Res.string.permission_title),
+                    body = stringResource(Res.string.permission_body),
+                    actionLabel = stringResource(Res.string.permission_grant),
+                    onAction = { scope.launch { permission = library.requestPermission() } },
+                )
+            }
 
-            month == null -> MonthsScreen(
-                library = library,
-                store = store,
-                onOpen = { opened -> openMonth = opened },
-            )
-
-            else -> DeckScreen(
-                library = library,
-                store = store,
-                month = month,
-                onBack = { openMonth = null },
-            )
+            else -> GalleryStack(component = component, library = library, store = store)
         }
     }
 }
+
+@Composable
+private fun GalleryStack(
+    component: GalleryComponent,
+    library: MediaLibrary,
+    store: DecisionStore,
+) {
+    val reduceMotion = isReduceMotionEnabled()
+
+    Children(
+        stack = component.stack,
+        modifier = Modifier.fillMaxSize(),
+        animation = stackAnimation(
+            animator = if (reduceMotion) {
+                fade(animationSpec = tween(durationMillis = FADE_MILLIS))
+            } else {
+                slide(animationSpec = tween(durationMillis = SLIDE_MILLIS)) +
+                    fade(animationSpec = tween(durationMillis = SLIDE_MILLIS))
+            },
+        ),
+    ) { child ->
+        Box(Modifier.fillMaxSize().safeDrawingPadding()) {
+            when (val instance = child.instance) {
+                GalleryComponent.Child.Months -> MonthsScreen(
+                    library = library,
+                    store = store,
+                    onOpen = component::openMonth,
+                )
+
+                is GalleryComponent.Child.Deck -> DeckScreen(
+                    library = library,
+                    store = store,
+                    month = instance.month,
+                    onBack = component::back,
+                )
+            }
+        }
+    }
+}
+
+private const val SLIDE_MILLIS = 280
+private const val FADE_MILLIS = 160
