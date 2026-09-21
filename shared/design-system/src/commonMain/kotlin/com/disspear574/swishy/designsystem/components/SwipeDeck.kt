@@ -59,6 +59,7 @@ fun <T : Any> SwipeDeck(
     val scope = rememberCoroutineScope()
 
     val offsetX = remember(topKey) { Animatable(0f) }
+    var target by remember(topKey) { mutableFloatStateOf(0f) }
     var width by remember { mutableFloatStateOf(1f) }
 
     val threshold = width * THRESHOLD_FRACTION
@@ -83,10 +84,11 @@ fun <T : Any> SwipeDeck(
                     reduceMotion = reduceMotion,
                     onWidth = { width = it },
                     onDrag = { amount ->
-                        scope.launch { offsetX.snapTo(offsetX.value + amount) }
+                        target += amount
+                        scope.launch { follow(offsetX, target, reduceMotion) }
                     },
                     onRelease = {
-                        val settled = (offsetX.value / threshold).coerceIn(-1f, 1f)
+                        val settled = (target / threshold).coerceIn(-1f, 1f)
                         scope.launch {
                             if (abs(settled) >= 1f) {
                                 fly(offsetX, settled, width)
@@ -95,6 +97,7 @@ fun <T : Any> SwipeDeck(
                                     if (settled > 0f) SwipeVerdict.Keep else SwipeVerdict.Trash,
                                 )
                             } else {
+                                target = 0f
                                 offsetX.animateTo(
                                     targetValue = 0f,
                                     animationSpec = if (reduceMotion) {
@@ -114,6 +117,20 @@ fun <T : Any> SwipeDeck(
                 }
             }
         }
+    }
+}
+
+private suspend fun follow(offsetX: Animatable<Float, *>, target: Float, reduceMotion: Boolean) {
+    if (reduceMotion) {
+        offsetX.snapTo(target)
+    } else {
+        offsetX.animateTo(
+            targetValue = target,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessMedium,
+            ),
+        )
     }
 }
 
