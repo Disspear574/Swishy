@@ -168,7 +168,8 @@ private fun TopCard(
             .graphicsLayer {
                 val travel = offsetX / width
                 translationX = offsetX
-                translationY = if (reduceMotion) 0f else -travel * travel * ARC_LIFT_DP * density
+                val lift = travel.coerceIn(-1f, 1f)
+                translationY = if (reduceMotion) 0f else -lift * lift * ARC_LIFT_DP * density
                 rotationZ = if (reduceMotion) {
                     0f
                 } else {
@@ -292,5 +293,5 @@ private const val SCALE_STEP = 0.1f
 
 private const val LIFT_STEP = 18f
 
-private const val ARC_LIFT_DP = 90f
+private const val ARC_LIFT_DP = 56f
 private val BADGE_SIZE = 92.dp
