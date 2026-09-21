@@ -6,6 +6,7 @@ import kotlin.test.assertTrue
 
 class AlbumsTest {
 
+    @Suppress("LongParameterList")
     private fun asset(
         id: String,
         kind: MediaKind = MediaKind.PHOTO,
