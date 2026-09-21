@@ -72,7 +72,7 @@ internal fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
             ) { result, _ ->
                 if (result != null && (!preview || image == null)) {
                     result.size.useContents {
-                        println("SWISHY size=${width}x${height} scale=${result.scale} preview=$preview")
+                        println("SWISHY size=$width x $height scale=${result.scale} preview=$preview")
                     }
                     image = result
                 }

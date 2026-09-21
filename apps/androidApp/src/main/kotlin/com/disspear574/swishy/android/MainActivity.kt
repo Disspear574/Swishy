@@ -8,13 +8,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import com.arkivanov.decompose.retainedComponent
 import com.disspear574.swishy.app.App
 import com.disspear574.swishy.app.createStore
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.gallery.GalleryComponent
 import com.disspear574.swishy.media.AndroidMediaLibrary
 import com.disspear574.swishy.media.MediaIndex
-import com.arkivanov.decompose.retainedComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

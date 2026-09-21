@@ -15,6 +15,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import com.arkivanov.decompose.extensions.compose.stack.Children
+import com.arkivanov.decompose.extensions.compose.stack.animation.fade
+import com.arkivanov.decompose.extensions.compose.stack.animation.plus
+import com.arkivanov.decompose.extensions.compose.stack.animation.slide
+import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.designsystem.components.EmptyState
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
@@ -26,11 +31,6 @@ import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.permission_body
 import com.disspear574.swishy.strings.permission_grant
 import com.disspear574.swishy.strings.permission_title
-import com.arkivanov.decompose.extensions.compose.stack.Children
-import com.arkivanov.decompose.extensions.compose.stack.animation.fade
-import com.arkivanov.decompose.extensions.compose.stack.animation.plus
-import com.arkivanov.decompose.extensions.compose.stack.animation.slide
-import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs

@@ -3,13 +3,13 @@ package com.disspear574.swishy.app
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.window.ComposeUIViewController
+import com.arkivanov.decompose.DefaultComponentContext
+import com.arkivanov.essenty.lifecycle.LifecycleRegistry
+import com.arkivanov.essenty.lifecycle.resume
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.gallery.GalleryComponent
 import com.disspear574.swishy.media.IosMediaLibrary
 import com.disspear574.swishy.media.MediaIndex
-import com.arkivanov.decompose.DefaultComponentContext
-import com.arkivanov.essenty.lifecycle.LifecycleRegistry
-import com.arkivanov.essenty.lifecycle.resume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

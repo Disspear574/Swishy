@@ -1,7 +1,5 @@
 package com.disspear574.swishy.gallery
 
-import com.disspear574.swishy.media.AlbumKind
-import com.disspear574.swishy.media.MonthKey
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
@@ -9,6 +7,8 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
+import com.disspear574.swishy.media.AlbumKind
+import com.disspear574.swishy.media.MonthKey
 
 @OptIn(com.arkivanov.decompose.DelicateDecomposeApi::class)
 class GalleryComponent(componentContext: ComponentContext) : ComponentContext by componentContext {

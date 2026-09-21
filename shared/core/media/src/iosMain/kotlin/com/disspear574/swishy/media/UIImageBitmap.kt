@@ -6,8 +6,6 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.useContents
 import kotlinx.cinterop.usePinned
-import platform.Foundation.NSDate
-import platform.Foundation.timeIntervalSinceReferenceDate
 import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.ColorType
 import org.jetbrains.skia.Image
@@ -21,12 +19,15 @@ import platform.CoreGraphics.CGImageAlphaInfo
 import platform.CoreGraphics.CGImageGetHeight
 import platform.CoreGraphics.CGImageGetWidth
 import platform.CoreGraphics.CGRectMake
+import platform.Foundation.NSDate
+import platform.Foundation.timeIntervalSinceReferenceDate
 import platform.UIKit.UIGraphicsBeginImageContextWithOptions
 import platform.UIKit.UIGraphicsEndImageContext
 import platform.UIKit.UIGraphicsGetImageFromCurrentImageContext
 import platform.UIKit.UIImage
 import platform.UIKit.UIImageOrientation
 
+@Suppress("ReturnCount")
 @OptIn(ExperimentalForeignApi::class)
 internal fun UIImage.toImageBitmap(): ImageBitmap? {
     val startedAt = NSDate().timeIntervalSinceReferenceDate
@@ -62,8 +63,8 @@ internal fun UIImage.toImageBitmap(): ImageBitmap? {
         bytes = pixels,
         rowBytes = rowBytes,
     ).toComposeImageBitmap()
-    val millis = (NSDate().timeIntervalSinceReferenceDate - startedAt) * 1000
-    println("SWISHY raster ${width}x${height} ${millis.toInt()}ms")
+    val millis = (NSDate().timeIntervalSinceReferenceDate - startedAt) * MILLIS_IN_SECOND
+    println("SWISHY raster $width x $height ${millis.toInt()}ms")
     return bitmap
 }
 
@@ -81,6 +82,8 @@ private fun UIImage.redrawn(): UIImage? {
     UIGraphicsEndImageContext()
     return redrawn
 }
+
+private const val MILLIS_IN_SECOND = 1_000
 
 private const val BYTES_PER_PIXEL = 4
 private const val BITS_PER_COMPONENT = 8uL
