@@ -6,6 +6,8 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.useContents
 import kotlinx.cinterop.usePinned
+import platform.Foundation.NSDate
+import platform.Foundation.timeIntervalSinceReferenceDate
 import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.ColorType
 import org.jetbrains.skia.Image
@@ -27,6 +29,7 @@ import platform.UIKit.UIImageOrientation
 
 @OptIn(ExperimentalForeignApi::class)
 internal fun UIImage.toImageBitmap(): ImageBitmap? {
+    val startedAt = NSDate().timeIntervalSinceReferenceDate
     val cgImage = upright()?.CGImage ?: redrawn()?.CGImage ?: return null
     val width = CGImageGetWidth(cgImage).toInt()
     val height = CGImageGetHeight(cgImage).toInt()
@@ -54,11 +57,14 @@ internal fun UIImage.toImageBitmap(): ImageBitmap? {
     }
     CGColorSpaceRelease(colorSpace)
 
-    return Image.makeRaster(
+    val bitmap = Image.makeRaster(
         imageInfo = ImageInfo(width, height, ColorType.RGBA_8888, ColorAlphaType.PREMUL),
         bytes = pixels,
         rowBytes = rowBytes,
     ).toComposeImageBitmap()
+    val millis = (NSDate().timeIntervalSinceReferenceDate - startedAt) * 1000
+    println("SWISHY raster ${width}x${height} ${millis.toInt()}ms")
+    return bitmap
 }
 
 @OptIn(ExperimentalForeignApi::class)

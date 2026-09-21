@@ -335,4 +335,4 @@ private const val DECK_DEPTH = 3
 
 private const val PREVIEW_DEPTH = 2
 
-private const val PREFETCH_DEPTH = 5
+private const val PREFETCH_DEPTH = 8

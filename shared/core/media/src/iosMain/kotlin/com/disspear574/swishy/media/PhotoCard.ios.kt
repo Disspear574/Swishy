@@ -14,6 +14,7 @@ import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitView
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import platform.CoreGraphics.CGSize
@@ -23,6 +24,7 @@ import platform.Photos.PHImageContentModeAspectFit
 import platform.Photos.PHImageManager
 import platform.Photos.PHImageRequestOptions
 import platform.Photos.PHImageRequestOptionsDeliveryModeOpportunistic
+import platform.Photos.PHImageRequestOptionsResizeModeFast
 import platform.Photos.PHLivePhoto
 import platform.Photos.PHLivePhotoRequestOptions
 import platform.PhotosUI.PHLivePhotoView
@@ -54,6 +56,7 @@ internal fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
     var frame by remember(id) { mutableStateOf<ImageBitmap?>(null) }
 
     DisposableEffect(id, preview) {
+        println("SWISHY request id=${id.take(8)} preview=$preview")
         val asset = fetchAsset(id)
         val manager = photoManager
         val requestId = asset?.let {
@@ -68,6 +71,9 @@ internal fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
                 options = imageOptions(),
             ) { result, _ ->
                 if (result != null && (!preview || image == null)) {
+                    result.size.useContents {
+                        println("SWISHY size=${width}x${height} scale=${result.scale} preview=$preview")
+                    }
                     image = result
                 }
             }
@@ -130,6 +136,7 @@ private fun LivePhotoCard(id: String, modifier: Modifier) {
 
 internal fun imageOptions(): PHImageRequestOptions = PHImageRequestOptions().apply {
     deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic
+    resizeMode = PHImageRequestOptionsResizeModeFast
     networkAccessAllowed = true
     synchronous = false
 }
