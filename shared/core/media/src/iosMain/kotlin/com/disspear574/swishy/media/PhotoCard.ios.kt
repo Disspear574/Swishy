@@ -11,11 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitView
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.readValue
+import platform.CoreGraphics.CGRectZero
 import platform.CoreGraphics.CGSizeMake
 import platform.Foundation.NSSelectorFromString
 import platform.Foundation.setValue
 import platform.Photos.PHAsset
 import platform.Photos.PHImageContentModeAspectFill
+import platform.Photos.PHImageContentModeAspectFit
 import platform.Photos.PHImageManager
 import platform.Photos.PHImageRequestOptions
 import platform.Photos.PHImageRequestOptionsDeliveryModeOpportunistic
@@ -23,10 +26,14 @@ import platform.Photos.PHLivePhoto
 import platform.Photos.PHLivePhotoRequestOptions
 import platform.PhotosUI.PHLivePhotoView
 import platform.PhotosUI.PHLivePhotoViewPlaybackStyleFull
+import platform.UIKit.NSLayoutConstraint
+import platform.UIKit.UIBlurEffect
+import platform.UIKit.UIBlurEffectStyle
 import platform.UIKit.UIImage
 import platform.UIKit.UIImageView
 import platform.UIKit.UIView
 import platform.UIKit.UIViewContentMode
+import platform.UIKit.UIVisualEffectView
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
@@ -47,7 +54,7 @@ actual fun PhotoCard(
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 private fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
-    var image by remember(id, preview) { mutableStateOf<UIImage?>(null) }
+    var image by remember(id) { mutableStateOf<UIImage?>(null) }
 
     DisposableEffect(id, preview) {
         val asset = fetchAsset(id)
@@ -60,10 +67,10 @@ private fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
                 } else {
                     CGSizeMake(TARGET_WIDTH, TARGET_HEIGHT)
                 },
-                contentMode = PHImageContentModeAspectFill,
+                contentMode = PHImageContentModeAspectFit,
                 options = imageOptions(),
             ) { result, _ ->
-                if (result != null) {
+                if (result != null && (!preview || image == null)) {
                     image = result
                 }
             }
@@ -72,20 +79,52 @@ private fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
     }
 
     UIKitView(
-        factory = {
-            UIImageView().apply {
-                contentMode = UIViewContentMode.UIViewContentModeScaleAspectFill
-                clipsToBounds = true
-            } as UIView
-        },
+        factory = { PhotoCardView() as UIView },
         modifier = modifier,
-        update = { view ->
-            (view as? UIImageView)?.let { imageView ->
-                imageView.setImage(image)
-                imageView.enableHighDynamicRangeIfSupported()
-            }
-        },
+        update = { view -> (view as? PhotoCardView)?.show(image) },
         properties = UIKitInteropProperties(interactionMode = null),
+    )
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private class PhotoCardView : UIView(frame = CGRectZero.readValue()) {
+    private val backdrop = UIImageView().apply {
+        contentMode = UIViewContentMode.UIViewContentModeScaleAspectFill
+        clipsToBounds = true
+        alpha = BACKDROP_ALPHA
+    }
+    private val blur = UIVisualEffectView(
+        effect = UIBlurEffect.effectWithStyle(UIBlurEffectStyle.UIBlurEffectStyleSystemMaterialDark),
+    )
+    private val front = UIImageView().apply {
+        contentMode = UIViewContentMode.UIViewContentModeScaleAspectFit
+        clipsToBounds = true
+    }
+
+    init {
+        clipsToBounds = true
+        listOf(backdrop, blur, front).forEach { subview ->
+            addSubview(subview)
+            subview.pinToEdgesOf(this)
+        }
+    }
+
+    fun show(image: UIImage?) {
+        backdrop.setImage(image)
+        front.setImage(image)
+        front.enableHighDynamicRangeIfSupported()
+    }
+}
+
+private fun UIView.pinToEdgesOf(parent: UIView) {
+    translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activateConstraints(
+        listOf(
+            leadingAnchor.constraintEqualToAnchor(parent.leadingAnchor),
+            trailingAnchor.constraintEqualToAnchor(parent.trailingAnchor),
+            topAnchor.constraintEqualToAnchor(parent.topAnchor),
+            bottomAnchor.constraintEqualToAnchor(parent.bottomAnchor),
+        ),
     )
 }
 
@@ -158,6 +197,8 @@ private fun UIImageView.enableHighDynamicRangeIfSupported() {
 private const val HIGH_DYNAMIC_RANGE = 2
 private const val TARGET_WIDTH = 1080.0
 private const val TARGET_HEIGHT = 1920.0
+
+private const val BACKDROP_ALPHA = 0.5
 
 private const val PREVIEW_WIDTH = 360.0
 private const val PREVIEW_HEIGHT = 640.0

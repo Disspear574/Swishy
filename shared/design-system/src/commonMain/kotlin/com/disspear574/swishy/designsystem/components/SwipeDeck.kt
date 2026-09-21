@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,95 +55,77 @@ fun <T : Any> SwipeDeck(
 
     val reduceMotion = isReduceMotionEnabled()
     val scope = rememberCoroutineScope()
-    val offsetX = remember { Animatable(0f) }
+
+    val offsetX = remember(topKey) { Animatable(0f) }
     var width by remember { mutableFloatStateOf(1f) }
 
     val threshold = width * THRESHOLD_FRACTION
     val progress = (offsetX.value / threshold).coerceIn(-1f, 1f)
     val magnitude = min(abs(progress), 1f)
 
-    LaunchedEffect(topKey) { offsetX.snapTo(0f) }
     LaunchedEffect(progress) { onProgressChange(progress) }
 
+    val visible = items.take(BEHIND_COUNT + 1)
+
     Box(modifier.fillMaxSize()) {
-        items.drop(1).take(BEHIND_COUNT).asReversed().forEachIndexed { index, item ->
-            val depth = min(BEHIND_COUNT - index, BEHIND_COUNT)
-            BehindCard(depth = depth, magnitude = if (reduceMotion) 0f else magnitude) {
-                content(item, false)
+        visible.withIndex().reversed().forEach { (depth, item) ->
+            key(key(item)) {
+                DeckCard(
+                    depth = depth,
+                    offsetX = offsetX.value,
+                    width = width,
+                    magnitude = if (reduceMotion && depth > 0) 0f else magnitude,
+                    progress = progress,
+                    keepLabel = keepLabel,
+                    trashLabel = trashLabel,
+                    reduceMotion = reduceMotion,
+                    onWidth = { width = it },
+                    onDrag = { amount ->
+                        scope.launch { offsetX.snapTo(offsetX.value + amount) }
+                    },
+                    onRelease = {
+                        val settled = (offsetX.value / threshold).coerceIn(-1f, 1f)
+                        scope.launch {
+                            if (abs(settled) >= 1f) {
+                                fly(offsetX, settled, width)
+                                onVerdict(
+                                    top,
+                                    if (settled > 0f) SwipeVerdict.Keep else SwipeVerdict.Trash,
+                                )
+                            } else {
+                                offsetX.animateTo(
+                                    targetValue = 0f,
+                                    animationSpec = if (reduceMotion) {
+                                        tween(durationMillis = 0)
+                                    } else {
+                                        spring(
+                                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                                            stiffness = Spring.StiffnessMediumLow,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                    },
+                ) {
+                    content(item, depth == 0)
+                }
             }
         }
-
-        TopCard(
-            offsetX = offsetX.value,
-            width = width,
-            magnitude = magnitude,
-            progress = progress,
-            keepLabel = keepLabel,
-            trashLabel = trashLabel,
-            reduceMotion = reduceMotion,
-            onWidth = { width = it },
-            onDrag = { amount -> scope.launch { offsetX.snapTo(offsetX.value + amount) } },
-            onRelease = {
-                val settled = (offsetX.value / threshold).coerceIn(-1f, 1f)
-                scope.launch {
-                    if (abs(settled) >= 1f) {
-                        val verdict =
-                            if (settled > 0f) SwipeVerdict.Keep else SwipeVerdict.Trash
-                        offsetX.animateTo(
-                            targetValue = (if (settled > 0f) 1f else -1f) * width * FLIGHT_SPAN,
-                            animationSpec = tween(durationMillis = FLIGHT_MILLIS),
-                        )
-                        onVerdict(top, verdict)
-                    } else {
-                        offsetX.animateTo(
-                            targetValue = 0f,
-                            animationSpec = if (reduceMotion) {
-                                tween(durationMillis = 0)
-                            } else {
-                                spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessMediumLow,
-                                )
-                            },
-                        )
-                    }
-                }
-            },
-            content = { content(top, true) },
-        )
     }
 }
 
-@Composable
-private fun BehindCard(depth: Int, magnitude: Float, content: @Composable () -> Unit) {
-    val scale = 1f - SCALE_STEP * depth
-    val nextScale = 1f - SCALE_STEP * (depth - 1)
-    val lift = LIFT_STEP * depth
-    val nextLift = LIFT_STEP * (depth - 1)
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                val grown = scale + (nextScale - scale) * magnitude
-                scaleX = grown
-                scaleY = grown
-                translationY = (lift + (nextLift - lift) * magnitude) * density
-            }
-            .clip(SwishyTheme.shapes.card)
-            .border(
-                width = 1.dp,
-                color = SwishyTheme.colors.hairline,
-                shape = SwishyTheme.shapes.card,
-            ),
-    ) {
-        content()
-    }
+private suspend fun fly(offsetX: Animatable<Float, *>, settled: Float, width: Float) {
+    offsetX.animateTo(
+        targetValue = (if (settled > 0f) 1f else -1f) * width * FLIGHT_SPAN,
+        animationSpec = tween(durationMillis = FLIGHT_MILLIS),
+    )
 }
 
 @Suppress("LongParameterList")
 @Composable
-private fun TopCard(
+private fun DeckCard(
+    depth: Int,
     offsetX: Float,
     width: Float,
     magnitude: Float,
@@ -156,50 +139,68 @@ private fun TopCard(
     content: @Composable () -> Unit,
 ) {
     val colors = SwishyTheme.colors
+    val isTop = depth == 0
     val verdictColor = if (progress >= 0f) colors.keep else colors.trash
-
-    val currentDrag by rememberUpdatedState(onDrag)
-    val currentRelease by rememberUpdatedState(onRelease)
-    val currentWidth by rememberUpdatedState(onWidth)
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .graphicsLayer {
-                val travel = offsetX / width
-                translationX = offsetX
-                val lift = travel.coerceIn(-1f, 1f)
-                translationY = if (reduceMotion) 0f else -lift * lift * ARC_LIFT_DP * density
-                rotationZ = if (reduceMotion) {
-                    0f
+                if (isTop) {
+                    translationX = offsetX
+                    val travel = offsetX / width
+                    val lift = travel.coerceIn(-1f, 1f)
+                    translationY = if (reduceMotion) 0f else -lift * lift * ARC_LIFT_DP * density
+                    rotationZ = if (reduceMotion) {
+                        0f
+                    } else {
+                        (travel * TILT_PER_WIDTH).coerceIn(-MAX_TILT, MAX_TILT)
+                    }
                 } else {
-                    (travel * TILT_PER_WIDTH).coerceIn(-MAX_TILT, MAX_TILT)
+                    val scale = 1f - SCALE_STEP * depth
+                    val nextScale = 1f - SCALE_STEP * (depth - 1)
+                    val lift = LIFT_STEP * depth
+                    val nextLift = LIFT_STEP * (depth - 1)
+                    val grown = scale + (nextScale - scale) * magnitude
+                    scaleX = grown
+                    scaleY = grown
+                    translationY = (lift + (nextLift - lift) * magnitude) * density
                 }
             }
             .clip(SwishyTheme.shapes.card)
-            .pointerInput(Unit) {
-                currentWidth(size.width.toFloat())
-                detectHorizontalDragGestures(
-                    onDragEnd = { currentRelease() },
-                    onDragCancel = { currentRelease() },
-                    onHorizontalDrag = { _, amount -> currentDrag(amount) },
-                )
-            }
-            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-            .drawWithContent {
-                drawContent()
-                if (magnitude > 0f) {
-                    drawRect(
-                        color = verdictColor,
-                        alpha = magnitude * TINT_ALPHA,
-                        blendMode = BlendMode.Multiply,
+            .then(
+                if (isTop) {
+                    Modifier
+                } else {
+                    Modifier.border(
+                        width = 1.dp,
+                        color = SwishyTheme.colors.hairline,
+                        shape = SwishyTheme.shapes.card,
                     )
-                }
-            },
+                },
+            )
+            .then(
+                if (isTop) {
+                    Modifier.swipeGesture(
+                        onWidth = onWidth,
+                        onDrag = onDrag,
+                        onRelease = onRelease,
+                    )
+                } else {
+                    Modifier
+                },
+            )
+            .then(
+                if (isTop && magnitude > 0f) {
+                    Modifier.verdictTint(color = verdictColor, magnitude = magnitude)
+                } else {
+                    Modifier
+                },
+            ),
     ) {
         content()
 
-        if (magnitude > 0f) {
+        if (isTop && magnitude > 0f) {
             Verdict(
                 magnitude = magnitude,
                 color = verdictColor,
@@ -212,6 +213,39 @@ private fun TopCard(
         }
     }
 }
+
+@Composable
+private fun Modifier.swipeGesture(
+    onWidth: (Float) -> Unit,
+    onDrag: (Float) -> Unit,
+    onRelease: () -> Unit,
+): Modifier {
+    val currentDrag by rememberUpdatedState(onDrag)
+    val currentRelease by rememberUpdatedState(onRelease)
+    val currentWidth by rememberUpdatedState(onWidth)
+
+    return pointerInput(Unit) {
+        currentWidth(size.width.toFloat())
+        detectHorizontalDragGestures(
+            onDragEnd = { currentRelease() },
+            onDragCancel = { currentRelease() },
+            onHorizontalDrag = { _, amount -> currentDrag(amount) },
+        )
+    }
+}
+
+private fun Modifier.verdictTint(
+    color: androidx.compose.ui.graphics.Color,
+    magnitude: Float,
+): Modifier = graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        drawRect(
+            color = color,
+            alpha = magnitude * TINT_ALPHA,
+            blendMode = BlendMode.Multiply,
+        )
+    }
 
 @Composable
 private fun Verdict(
