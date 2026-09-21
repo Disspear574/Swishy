@@ -236,7 +236,7 @@ private fun rememberSettle(depth: Int, reduceMotion: Boolean): Float {
                 targetValue = 1f,
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessMedium,
+                    stiffness = Spring.StiffnessMediumLow,
                 ),
             )
         }
