@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -36,6 +37,7 @@ import com.disspear574.swishy.designsystem.theme.isReduceMotionEnabled
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.min
+import kotlin.math.pow
 
 enum class SwipeVerdict { Keep, Trash }
 
@@ -142,29 +144,32 @@ private fun DeckCard(
     val isTop = depth == 0
     val verdictColor = if (progress >= 0f) colors.keep else colors.trash
 
+    val advance = if (reduceMotion) 0f else (1f - (1f - magnitude).pow(3)) * DRAG_CATCHUP
+    val settle = rememberSettle(depth = depth, reduceMotion = reduceMotion)
+
+    val slot = depth - (if (isTop) 0f else advance) + (1f - DRAG_CATCHUP) * (1f - settle)
+    val slotScale = 1f - SCALE_STEP * slot
+    val slotLift = LIFT_STEP * slot
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .graphicsLayer {
+                scaleX = slotScale
+                scaleY = slotScale
+                translationY = slotLift * density
                 if (isTop) {
                     translationX = offsetX
                     val travel = offsetX / width
                     val lift = travel.coerceIn(-1f, 1f)
-                    translationY = if (reduceMotion) 0f else -lift * lift * ARC_LIFT_DP * density
+                    if (!reduceMotion) {
+                        translationY -= lift * lift * ARC_LIFT_DP * density
+                    }
                     rotationZ = if (reduceMotion) {
                         0f
                     } else {
                         (travel * TILT_PER_WIDTH).coerceIn(-MAX_TILT, MAX_TILT)
                     }
-                } else {
-                    val scale = 1f - SCALE_STEP * depth
-                    val nextScale = 1f - SCALE_STEP * (depth - 1)
-                    val lift = LIFT_STEP * depth
-                    val nextLift = LIFT_STEP * (depth - 1)
-                    val grown = scale + (nextScale - scale) * magnitude
-                    scaleX = grown
-                    scaleY = grown
-                    translationY = (lift + (nextLift - lift) * magnitude) * density
                 }
             }
             .clip(SwishyTheme.shapes.card)
@@ -212,6 +217,31 @@ private fun DeckCard(
             )
         }
     }
+}
+
+@Composable
+private fun rememberSettle(depth: Int, reduceMotion: Boolean): Float {
+    val settle = remember { Animatable(1f) }
+    var lastDepth by remember { mutableIntStateOf(depth) }
+
+    LaunchedEffect(depth) {
+        val rose = depth < lastDepth
+        lastDepth = depth
+        if (!rose) return@LaunchedEffect
+        if (reduceMotion) {
+            settle.snapTo(1f)
+        } else {
+            settle.snapTo(0f)
+            settle.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    stiffness = Spring.StiffnessMedium,
+                ),
+            )
+        }
+    }
+    return settle.value
 }
 
 @Composable
@@ -322,6 +352,8 @@ private const val VERDICT_MIN_SCALE = 0.78f
 private const val FLIGHT_SPAN = 1.6f
 private const val FLIGHT_MILLIS = 260
 private const val BEHIND_COUNT = 2
+
+private const val DRAG_CATCHUP = 0.55f
 
 private const val SCALE_STEP = 0.1f
 
