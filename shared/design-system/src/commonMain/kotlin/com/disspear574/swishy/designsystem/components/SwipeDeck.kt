@@ -166,11 +166,13 @@ private fun TopCard(
         modifier = Modifier
             .fillMaxSize()
             .graphicsLayer {
+                val travel = offsetX / width
                 translationX = offsetX
+                translationY = if (reduceMotion) 0f else -travel * travel * ARC_LIFT_DP * density
                 rotationZ = if (reduceMotion) {
                     0f
                 } else {
-                    (offsetX / width * TILT_PER_WIDTH).coerceIn(-MAX_TILT, MAX_TILT)
+                    (travel * TILT_PER_WIDTH).coerceIn(-MAX_TILT, MAX_TILT)
                 }
             }
             .clip(SwishyTheme.shapes.card)
@@ -286,7 +288,9 @@ private const val FLIGHT_SPAN = 1.6f
 private const val FLIGHT_MILLIS = 260
 private const val BEHIND_COUNT = 2
 
-private const val SCALE_STEP = 0.06f
+private const val SCALE_STEP = 0.1f
 
-private const val LIFT_STEP = 12f
+private const val LIFT_STEP = 18f
+
+private const val ARC_LIFT_DP = 90f
 private val BADGE_SIZE = 92.dp
