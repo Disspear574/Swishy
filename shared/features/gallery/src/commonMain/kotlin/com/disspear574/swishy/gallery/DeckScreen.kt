@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.disspear574.swishy.decisions.Decision
@@ -62,7 +61,6 @@ import com.disspear574.swishy.strings.deck_undo
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.abs
 
 @Composable
 internal fun DeckScreen(
@@ -71,6 +69,7 @@ internal fun DeckScreen(
     store: DecisionStore,
     month: MonthKey,
     onBack: () -> Unit,
+    onSwipeProgress: (Float) -> Unit,
 ) {
     val colors = SwishyTheme.colors
     val spacing = SwishyTheme.spacing
@@ -78,7 +77,6 @@ internal fun DeckScreen(
     var deck by remember(month) { mutableStateOf<Deck?>(null) }
     var reloadToken by remember(month) { mutableIntStateOf(0) }
     var outcome by remember(month) { mutableStateOf<DeleteResult?>(null) }
-    var progress by remember(month) { mutableFloatStateOf(0f) }
     var liveId by remember(month) { mutableStateOf<String?>(null) }
 
     val zone = remember { TimeZone.currentSystemDefault() }
@@ -94,21 +92,13 @@ internal fun DeckScreen(
     val current = deck ?: return
     val asset = current.current
 
+    DisposableEffect(Unit) { onDispose { onSwipeProgress(0f) } }
+
     LaunchedEffect(asset?.id) {
         val id = asset?.id ?: return@LaunchedEffect
         currentSize = if (asset.sizeBytes > 0) asset.sizeBytes else index.sizeOf(id)
     }
-    val wash = if (progress >= 0f) colors.keep else colors.trash
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .drawBehind {
-                if (progress != 0f) {
-                    drawRect(color = wash, alpha = abs(progress) * WASH_ALPHA)
-                }
-            },
-    ) {
+    Column(Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -164,7 +154,7 @@ internal fun DeckScreen(
                 keepLabel = stringResource(Res.string.deck_keep),
                 trashLabel = stringResource(Res.string.deck_trash),
                 onVerdict = { _, verdict ->
-                    progress = 0f
+                    onSwipeProgress(0f)
                     deck = current.decide(
                         decision = if (verdict == SwipeVerdict.Keep) {
                             Decision.KEPT
@@ -174,7 +164,7 @@ internal fun DeckScreen(
                         sizeBytes = currentSize,
                     )
                 },
-                onProgressChange = { value -> progress = value },
+                onProgressChange = onSwipeProgress,
             ) { item, isTop ->
                 Box(
                     modifier = Modifier
@@ -311,7 +301,5 @@ private fun Modifier.holdToPlayLive(key: Any, onChange: (Boolean) -> Unit): Modi
     }
 
 private const val LIVE_HOLD_MILLIS = 350L
-
-private const val WASH_ALPHA = 0.28f
 
 private const val DECK_DEPTH = 3

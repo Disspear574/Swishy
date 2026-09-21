@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.designsystem.components.EmptyState
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
@@ -31,6 +33,7 @@ import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.abs
 
 @Composable
 fun GalleryScreen(
@@ -41,13 +44,22 @@ fun GalleryScreen(
 ) {
     val scope = rememberCoroutineScope()
     var permission by remember { mutableStateOf<PermissionState?>(null) }
+    var swipeProgress by remember { mutableFloatStateOf(0f) }
 
     LaunchedEffect(Unit) { permission = library.permissionState() }
+
+    val colors = SwishyTheme.colors
+    val wash = if (swipeProgress >= 0f) colors.keep else colors.trash
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SwishyTheme.colors.ground),
+            .background(colors.ground)
+            .drawBehind {
+                if (swipeProgress != 0f) {
+                    drawRect(color = wash, alpha = abs(swipeProgress) * WASH_ALPHA)
+                }
+            },
     ) {
         val state = permission
         when {
@@ -69,6 +81,7 @@ fun GalleryScreen(
                 library = library,
                 index = index,
                 store = store,
+                onSwipeProgress = { value -> swipeProgress = value },
             )
         }
     }
@@ -80,6 +93,7 @@ private fun GalleryStack(
     library: MediaLibrary,
     index: MediaIndex,
     store: DecisionStore,
+    onSwipeProgress: (Float) -> Unit,
 ) {
     val reduceMotion = isReduceMotionEnabled()
 
@@ -117,11 +131,14 @@ private fun GalleryStack(
                     store = store,
                     month = instance.month,
                     onBack = component::back,
+                    onSwipeProgress = onSwipeProgress,
                 )
             }
         }
     }
 }
+
+private const val WASH_ALPHA = 0.28f
 
 private const val SLIDE_MILLIS = 280
 private const val FADE_MILLIS = 160

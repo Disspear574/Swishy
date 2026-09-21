@@ -29,7 +29,9 @@ class IosMediaLibrary : MediaLibrary {
     override suspend fun requestPermission(): PermissionState =
         suspendCancellableCoroutine { continuation ->
             PHPhotoLibrary.requestAuthorizationForAccessLevel(PHAccessLevelReadWrite) { status ->
-                continuation.resume(status.toState())
+                if (continuation.isActive) {
+                    continuation.resume(status.toState())
+                }
             }
         }
 
@@ -105,7 +107,9 @@ class IosMediaLibrary : MediaLibrary {
                             reason = error?.localizedDescription ?: "unknown",
                         )
                     }
-                    continuation.resume(result)
+                    if (continuation.isActive) {
+                        continuation.resume(result)
+                    }
                 },
             )
         }

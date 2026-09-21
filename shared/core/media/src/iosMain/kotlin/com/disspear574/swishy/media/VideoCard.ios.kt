@@ -2,6 +2,7 @@ package com.disspear574.swishy.media
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
@@ -25,6 +26,14 @@ import platform.Photos.PHVideoRequestOptions
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun VideoCard(id: String, modifier: Modifier) {
+    key(id) {
+        VideoCardContent(id = id, modifier = modifier)
+    }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+@Composable
+private fun VideoCardContent(id: String, modifier: Modifier) {
     val player = remember(id) { AVPlayer() }
 
     DisposableEffect(id) {
@@ -33,7 +42,7 @@ actual fun VideoCard(id: String, modifier: Modifier) {
         val asset = PHAsset.fetchAssetsWithLocalIdentifiers(listOf(id), null)
             .firstObject as? PHAsset
         if (asset != null) {
-            val options = PHVideoRequestOptions().apply { networkAccessAllowed = false }
+            val options = PHVideoRequestOptions().apply { networkAccessAllowed = true }
             PHImageManager.defaultManager().requestPlayerItemForVideo(
                 asset = asset,
                 options = options,
