@@ -28,6 +28,17 @@
     <string name="confirm_yes">Сбросить</string>
     <string name="confirm_no">Отмена</string>
     <string name="a11y_open_settings">Открыть настройки</string>
+    <string name="duplicates_title">Дубликаты</string>
+    <string name="duplicates_subtitle">Одинаковые и похожие кадры</string>
+    <string name="duplicates_scanning">Просмотрено %1$d из %2$d</string>
+    <string name="duplicates_none">Дубликатов не нашлось</string>
+    <string name="duplicates_identical">Одинаковые</string>
+    <string name="duplicates_similar">Похожие</string>
+    <string name="duplicates_group_size">%1$d кадров · %2$s</string>
+    <string name="duplicates_keep_largest">Оставить самый крупный</string>
+    <string name="duplicates_trash">В корзину · %1$d</string>
+    <string name="a11y_open_duplicates">Открыть дубликаты</string>
+    <string name="a11y_duplicate_frame">Кадр %1$s, нажатие выбирает его в корзину</string>
     <string name="mix_title">Вперемешку</string>
     <string name="mix_subtitle">Случайные кадры за всё время</string>
     <string name="a11y_open_mix">Разобрать вперемешку, %1$d кадров</string>

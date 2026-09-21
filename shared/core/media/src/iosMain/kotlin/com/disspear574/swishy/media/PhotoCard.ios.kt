@@ -14,7 +14,6 @@ import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitView
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.useContents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import platform.CoreGraphics.CGSize
@@ -56,7 +55,6 @@ internal fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
     var frame by remember(id) { mutableStateOf<ImageBitmap?>(null) }
 
     DisposableEffect(id, preview) {
-        println("SWISHY request id=${id.take(8)} preview=$preview")
         val asset = fetchAsset(id)
         val manager = photoManager
         val requestId = asset?.let {
@@ -71,9 +69,6 @@ internal fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
                 options = imageOptions(),
             ) { result, _ ->
                 if (result != null && (!preview || image == null)) {
-                    result.size.useContents {
-                        println("SWISHY size=$width x $height scale=${result.scale} preview=$preview")
-                    }
                     image = result
                 }
             }

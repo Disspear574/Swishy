@@ -27,11 +27,14 @@ import com.disspear574.swishy.media.albumSummaries
 import com.disspear574.swishy.media.groupIntoMonths
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_open_album
+import com.disspear574.swishy.strings.a11y_open_duplicates
 import com.disspear574.swishy.strings.a11y_open_mix
 import com.disspear574.swishy.strings.a11y_open_month
 import com.disspear574.swishy.strings.a11y_open_settings
 import com.disspear574.swishy.strings.a11y_open_trash
 import com.disspear574.swishy.strings.albums_section
+import com.disspear574.swishy.strings.duplicates_subtitle
+import com.disspear574.swishy.strings.duplicates_title
 import com.disspear574.swishy.strings.mix_subtitle
 import com.disspear574.swishy.strings.mix_title
 import com.disspear574.swishy.strings.months_empty
@@ -52,6 +55,7 @@ internal fun MonthsScreen(
     onOpenMix: () -> Unit,
     onOpenAlbum: (AlbumKind) -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenDuplicates: () -> Unit,
     onOpenTrash: () -> Unit,
 ) {
     val spacing = SwishyTheme.spacing
@@ -128,13 +132,21 @@ internal fun MonthsScreen(
             }
         }
 
-        if (albums.isNotEmpty()) {
-            item(key = "albums") {
-                SectionLabel(
-                    text = stringResource(Res.string.albums_section),
-                    modifier = Modifier.padding(top = spacing.medium),
-                )
-            }
+        item(key = "albums-label") {
+            SectionLabel(
+                text = stringResource(Res.string.albums_section),
+                modifier = Modifier.padding(top = spacing.medium),
+            )
+        }
+
+        item(key = "duplicates") {
+            MonthRow(
+                title = stringResource(Res.string.duplicates_title),
+                subtitle = stringResource(Res.string.duplicates_subtitle),
+                size = "",
+                onClick = onOpenDuplicates,
+                contentDescription = stringResource(Res.string.a11y_open_duplicates),
+            )
         }
 
         items(albums, key = { "album-${it.album.name}" }) { summary ->

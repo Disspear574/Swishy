@@ -2,8 +2,10 @@ package com.disspear574.swishy.app
 
 import androidx.compose.runtime.Composable
 import com.disspear574.swishy.decisions.DecisionStore
+import com.disspear574.swishy.decisions.db.HashStore
 import com.disspear574.swishy.decisions.db.createDatabase
 import com.disspear574.swishy.decisions.db.createDecisionStore
+import com.disspear574.swishy.decisions.db.createHashStore
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.gallery.GalleryComponent
 import com.disspear574.swishy.gallery.GalleryScreen
@@ -16,17 +18,25 @@ fun App(
     component: GalleryComponent,
     library: MediaLibrary,
     index: MediaIndex,
-    store: DecisionStore,
+    stores: SwishyStores,
 ) {
     SwishyTheme {
         GalleryScreen(
             component = component,
             library = library,
             index = index,
-            store = store,
+            store = stores.decisions,
+            hashStore = stores.hashes,
         )
     }
 }
 
-suspend fun createStore(scope: CoroutineScope): DecisionStore =
-    createDecisionStore(database = createDatabase(), scope = scope)
+class SwishyStores(val decisions: DecisionStore, val hashes: HashStore)
+
+suspend fun createStores(scope: CoroutineScope): SwishyStores {
+    val database = createDatabase()
+    return SwishyStores(
+        decisions = createDecisionStore(database = database, scope = scope),
+        hashes = createHashStore(database),
+    )
+}

@@ -25,6 +25,7 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
                 Config.Months -> Child.Months
                 Config.Trash -> Child.Trash
                 Config.Settings -> Child.Settings
+                Config.Duplicates -> Child.Duplicates
                 is Config.Deck -> Child.Deck(config.source)
             }
         },
@@ -46,6 +47,10 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
         navigation.push(Config.Trash)
     }
 
+    fun openDuplicates() {
+        navigation.push(Config.Duplicates)
+    }
+
     fun openSettings() {
         navigation.push(Config.Settings)
     }
@@ -58,6 +63,7 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
         data object Months : Config
         data object Trash : Config
         data object Settings : Config
+        data object Duplicates : Config
         data class Deck(val source: DeckSource) : Config
     }
 
@@ -65,6 +71,7 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
         data object Months : Child
         data object Trash : Child
         data object Settings : Child
+        data object Duplicates : Child
         data class Deck(val source: DeckSource) : Child
     }
 }

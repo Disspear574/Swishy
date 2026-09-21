@@ -10,8 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import com.arkivanov.decompose.retainedComponent
 import com.disspear574.swishy.app.App
-import com.disspear574.swishy.app.createStore
-import com.disspear574.swishy.decisions.DecisionStore
+import com.disspear574.swishy.app.SwishyStores
+import com.disspear574.swishy.app.createStores
 import com.disspear574.swishy.gallery.GalleryComponent
 import com.disspear574.swishy.media.AndroidMediaLibrary
 import com.disspear574.swishy.media.MediaIndex
@@ -33,15 +33,15 @@ class MainActivity : ComponentActivity() {
         val component = retainedComponent { context -> GalleryComponent(context) }
 
         setContent {
-            val store: DecisionStore? by produceState<DecisionStore?>(initialValue = null) {
+            val stores: SwishyStores? by produceState<SwishyStores?>(initialValue = null) {
                 value = StoreHolder.get()
             }
-            store?.let { ready ->
+            stores?.let { ready ->
                 App(
                     component = component,
                     library = library,
                     index = index,
-                    store = ready,
+                    stores = ready,
                 )
             }
         }
@@ -67,7 +67,7 @@ private object MediaHolder {
 private object StoreHolder {
 
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private var store: DecisionStore? = null
+    private var stores: SwishyStores? = null
 
-    suspend fun get(): DecisionStore = store ?: createStore(scope).also { store = it }
+    suspend fun get(): SwishyStores = stores ?: createStores(scope).also { stores = it }
 }

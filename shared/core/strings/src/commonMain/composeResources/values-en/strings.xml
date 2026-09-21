@@ -28,6 +28,17 @@
     <string name="confirm_yes">Reset</string>
     <string name="confirm_no">Cancel</string>
     <string name="a11y_open_settings">Open settings</string>
+    <string name="duplicates_title">Duplicates</string>
+    <string name="duplicates_subtitle">Identical and similar shots</string>
+    <string name="duplicates_scanning">Scanned %1$d of %2$d</string>
+    <string name="duplicates_none">No duplicates found</string>
+    <string name="duplicates_identical">Identical</string>
+    <string name="duplicates_similar">Similar</string>
+    <string name="duplicates_group_size">%1$d items · %2$s</string>
+    <string name="duplicates_keep_largest">Keep the largest</string>
+    <string name="duplicates_trash">To trash · %1$d</string>
+    <string name="a11y_open_duplicates">Open duplicates</string>
+    <string name="a11y_duplicate_frame">Item %1$s, tap selects it for the trash</string>
     <string name="mix_title">Shuffle</string>
     <string name="mix_subtitle">Random shots from all time</string>
     <string name="a11y_open_mix">Sort shuffled, %1$d items</string>

@@ -19,8 +19,6 @@ import platform.CoreGraphics.CGImageAlphaInfo
 import platform.CoreGraphics.CGImageGetHeight
 import platform.CoreGraphics.CGImageGetWidth
 import platform.CoreGraphics.CGRectMake
-import platform.Foundation.NSDate
-import platform.Foundation.timeIntervalSinceReferenceDate
 import platform.UIKit.UIGraphicsBeginImageContextWithOptions
 import platform.UIKit.UIGraphicsEndImageContext
 import platform.UIKit.UIGraphicsGetImageFromCurrentImageContext
@@ -30,7 +28,6 @@ import platform.UIKit.UIImageOrientation
 @Suppress("ReturnCount")
 @OptIn(ExperimentalForeignApi::class)
 internal fun UIImage.toImageBitmap(): ImageBitmap? {
-    val startedAt = NSDate().timeIntervalSinceReferenceDate
     val cgImage = upright()?.CGImage ?: redrawn()?.CGImage ?: return null
     val width = CGImageGetWidth(cgImage).toInt()
     val height = CGImageGetHeight(cgImage).toInt()
@@ -58,14 +55,11 @@ internal fun UIImage.toImageBitmap(): ImageBitmap? {
     }
     CGColorSpaceRelease(colorSpace)
 
-    val bitmap = Image.makeRaster(
+    return Image.makeRaster(
         imageInfo = ImageInfo(width, height, ColorType.RGBA_8888, ColorAlphaType.PREMUL),
         bytes = pixels,
         rowBytes = rowBytes,
     ).toComposeImageBitmap()
-    val millis = (NSDate().timeIntervalSinceReferenceDate - startedAt) * MILLIS_IN_SECOND
-    println("SWISHY raster $width x $height ${millis.toInt()}ms")
-    return bitmap
 }
 
 @OptIn(ExperimentalForeignApi::class)
@@ -82,8 +76,6 @@ private fun UIImage.redrawn(): UIImage? {
     UIGraphicsEndImageContext()
     return redrawn
 }
-
-private const val MILLIS_IN_SECOND = 1_000
 
 private const val BYTES_PER_PIXEL = 4
 private const val BITS_PER_COMPONENT = 8uL

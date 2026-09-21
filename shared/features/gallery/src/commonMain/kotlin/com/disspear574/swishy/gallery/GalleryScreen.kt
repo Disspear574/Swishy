@@ -21,6 +21,7 @@ import com.arkivanov.decompose.extensions.compose.stack.animation.plus
 import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import com.disspear574.swishy.decisions.DecisionStore
+import com.disspear574.swishy.decisions.db.HashStore
 import com.disspear574.swishy.designsystem.components.EmptyState
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.designsystem.theme.isReduceMotionEnabled
@@ -41,6 +42,7 @@ fun GalleryScreen(
     library: MediaLibrary,
     index: MediaIndex,
     store: DecisionStore,
+    hashStore: HashStore,
 ) {
     val scope = rememberCoroutineScope()
     var permission by remember { mutableStateOf<PermissionState?>(null) }
@@ -81,6 +83,7 @@ fun GalleryScreen(
                 library = library,
                 index = index,
                 store = store,
+                hashStore = hashStore,
                 onSwipeProgress = { value -> swipeProgress = value },
             )
         }
@@ -88,11 +91,13 @@ fun GalleryScreen(
 }
 
 @Composable
+@Suppress("LongParameterList")
 private fun GalleryStack(
     component: GalleryComponent,
     library: MediaLibrary,
     index: MediaIndex,
     store: DecisionStore,
+    hashStore: HashStore,
     onSwipeProgress: (Float) -> Unit,
 ) {
     val reduceMotion = isReduceMotionEnabled()
@@ -118,7 +123,15 @@ private fun GalleryStack(
                     onOpenMix = component::openMix,
                     onOpenAlbum = component::openAlbum,
                     onOpenSettings = component::openSettings,
+                    onOpenDuplicates = component::openDuplicates,
                     onOpenTrash = component::openTrash,
+                )
+
+                GalleryComponent.Child.Duplicates -> DuplicatesScreen(
+                    index = index,
+                    store = store,
+                    hashStore = hashStore,
+                    onBack = component::back,
                 )
 
                 GalleryComponent.Child.Settings -> SettingsScreen(
