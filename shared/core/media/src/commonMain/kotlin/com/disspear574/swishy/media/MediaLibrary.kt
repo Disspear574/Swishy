@@ -8,6 +8,8 @@ interface MediaLibrary {
 
     suspend fun allAssets(): List<MediaAsset>
 
+    suspend fun sizeOf(ids: List<String>): Map<String, Long>
+
     suspend fun assets(month: MonthKey): List<MediaAsset>
 
     suspend fun assets(ids: List<String>): List<MediaAsset>

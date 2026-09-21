@@ -13,6 +13,7 @@ import com.disspear574.swishy.app.createStore
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.gallery.GalleryComponent
 import com.disspear574.swishy.media.AndroidMediaLibrary
+import com.disspear574.swishy.media.MediaIndex
 import com.arkivanov.decompose.retainedComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,7 @@ class MainActivity : ComponentActivity() {
         enableHighDynamicRange()
 
         val library = AndroidMediaLibrary(context = this, requestHost = requestHost)
+        val index = MediaHolder.index(library)
         val component = retainedComponent { context -> GalleryComponent(context) }
 
         setContent {
@@ -35,7 +37,12 @@ class MainActivity : ComponentActivity() {
                 value = StoreHolder.get()
             }
             store?.let { ready ->
-                App(component = component, library = library, store = ready)
+                App(
+                    component = component,
+                    library = library,
+                    index = index,
+                    store = ready,
+                )
             }
         }
     }
@@ -49,9 +56,17 @@ private fun ComponentActivity.enableHighDynamicRange() {
     }
 }
 
+private object MediaHolder {
+
+    private var cached: MediaIndex? = null
+
+    fun index(library: AndroidMediaLibrary): MediaIndex =
+        cached ?: MediaIndex(library = library, scope = StoreHolder.scope).also { cached = it }
+}
+
 private object StoreHolder {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var store: DecisionStore? = null
 
     suspend fun get(): DecisionStore = store ?: createStore(scope).also { store = it }

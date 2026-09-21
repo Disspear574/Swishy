@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.disspear574.swishy.decisions.Decision
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.decisions.Deck
@@ -41,11 +43,13 @@ import com.disspear574.swishy.designsystem.components.SwishyText
 import com.disspear574.swishy.designsystem.components.TrackMark
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.media.DeleteResult
+import com.disspear574.swishy.media.MediaIndex
 import com.disspear574.swishy.media.MediaKind
 import com.disspear574.swishy.media.MediaLibrary
 import com.disspear574.swishy.media.MonthKey
 import com.disspear574.swishy.media.PhotoCard
 import com.disspear574.swishy.media.VideoCard
+import com.disspear574.swishy.media.monthKeyIn
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_back
 import com.disspear574.swishy.strings.deck_finished
@@ -56,12 +60,14 @@ import com.disspear574.swishy.strings.deck_progress
 import com.disspear574.swishy.strings.deck_trash
 import com.disspear574.swishy.strings.deck_undo
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 
 @Composable
 internal fun DeckScreen(
     library: MediaLibrary,
+    index: MediaIndex,
     store: DecisionStore,
     month: MonthKey,
     onBack: () -> Unit,
@@ -75,10 +81,23 @@ internal fun DeckScreen(
     var progress by remember(month) { mutableFloatStateOf(0f) }
     var liveId by remember(month) { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(month, reloadToken) { deck = Deck.of(library.assets(month), store) }
+    val zone = remember { TimeZone.currentSystemDefault() }
+    val scanned by index.assets.collectAsStateWithLifecycle()
+    LaunchedEffect(month, reloadToken, scanned) {
+        index.load()
+        val all = scanned ?: return@LaunchedEffect
+        deck = Deck.of(all.filter { it.monthKeyIn(zone) == month }, store)
+    }
+
+    var currentSize by remember(month) { mutableLongStateOf(0L) }
 
     val current = deck ?: return
     val asset = current.current
+
+    LaunchedEffect(asset?.id) {
+        val id = asset?.id ?: return@LaunchedEffect
+        currentSize = if (asset.sizeBytes > 0) asset.sizeBytes else index.sizeOf(id)
+    }
     val wash = if (progress >= 0f) colors.keep else colors.trash
 
     Column(
@@ -147,11 +166,16 @@ internal fun DeckScreen(
                 onVerdict = { _, verdict ->
                     progress = 0f
                     deck = current.decide(
-                        if (verdict == SwipeVerdict.Keep) Decision.KEPT else Decision.TRASHED,
+                        decision = if (verdict == SwipeVerdict.Keep) {
+                            Decision.KEPT
+                        } else {
+                            Decision.TRASHED
+                        },
+                        sizeBytes = currentSize,
                     )
                 },
                 onProgressChange = { value -> progress = value },
-            ) { item ->
+            ) { item, isTop ->
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -176,6 +200,7 @@ internal fun DeckScreen(
                             modifier = Modifier.fillMaxSize(),
                             live = item.isLive,
                             playingLive = liveId == item.id,
+                            preview = !isTop,
                         )
                     }
                 }
@@ -209,7 +234,7 @@ internal fun DeckScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             SwishyText(
-                text = formatSize(asset.sizeBytes).label(),
+                text = formatSize(currentSize).label(),
                 style = SwishyTheme.typography.numeric,
                 color = colors.inkFaint,
                 modifier = Modifier.weight(1f),
@@ -231,6 +256,7 @@ internal fun DeckScreen(
             onOutcome = { result -> outcome = result },
             onDeleted = { ids ->
                 ids.forEach(store::forget)
+                index.invalidate()
                 deck = null
                 reloadToken += 1
             },

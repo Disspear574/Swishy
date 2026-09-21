@@ -9,4 +9,5 @@ expect fun PhotoCard(
     modifier: Modifier,
     live: Boolean = false,
     playingLive: Boolean = false,
+    preview: Boolean = false,
 )

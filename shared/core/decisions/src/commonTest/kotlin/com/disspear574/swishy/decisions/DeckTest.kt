@@ -84,6 +84,15 @@ class DeckTest {
     }
 
     @Test
+    fun `размер можно передать явно, если он стал известен позже`() {
+        val store = InMemoryDecisionStore()
+        Deck.of(listOf(asset("a", sizeBytes = 0)), store)
+            .decide(Decision.TRASHED, sizeBytes = 7_000)
+
+        assertEquals(7_000, store.trashedBytes())
+    }
+
+    @Test
     fun `ближайшие кадры начинаются с текущего`() {
         val deck = Deck.of(three, InMemoryDecisionStore())
 

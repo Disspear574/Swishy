@@ -3,19 +3,16 @@ package com.disspear574.swishy.media
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.datetime.TimeZone
 import platform.Foundation.NSMutableArray
-import platform.Foundation.NSNumber
 import platform.Foundation.NSPredicate
 import platform.Foundation.NSSortDescriptor
 import platform.Foundation.addObject
 import platform.Foundation.timeIntervalSince1970
-import platform.Foundation.valueForKey
 import platform.Photos.PHAccessLevelReadWrite
 import platform.Photos.PHAsset
 import platform.Photos.PHAssetChangeRequest
 import platform.Photos.PHAssetMediaSubtypePhotoLive
 import platform.Photos.PHAssetMediaTypeImage
 import platform.Photos.PHAssetMediaTypeVideo
-import platform.Photos.PHAssetResource
 import platform.Photos.PHAuthorizationStatusAuthorized
 import platform.Photos.PHAuthorizationStatusDenied
 import platform.Photos.PHAuthorizationStatusLimited
@@ -37,6 +34,13 @@ class IosMediaLibrary : MediaLibrary {
         }
 
     override suspend fun allAssets(): List<MediaAsset> = readAll()
+
+    override suspend fun sizeOf(ids: List<String>): Map<String, Long> {
+        val wanted = ids.toHashSet()
+        return fetchAssets()
+            .filter { it.localIdentifier in wanted }
+            .associate { it.localIdentifier to it.fileSizeBytes() }
+    }
 
     override suspend fun assets(month: MonthKey): List<MediaAsset> {
         val zone = TimeZone.currentSystemDefault()
@@ -67,20 +71,13 @@ class IosMediaLibrary : MediaLibrary {
         }
     }
 
-    private fun PHAsset.fileSizeBytes(): Long {
-        val resource = PHAssetResource.assetResourcesForAsset(this).firstOrNull() as? PHAssetResource
-            ?: return 0
-        val value = resource.valueForKey("fileSize") as? NSNumber ?: return 0
-        return value.longLongValue
-    }
-
     private fun readAll(): List<MediaAsset> = fetchAssets().map { asset ->
         val isVideo = asset.mediaType == PHAssetMediaTypeVideo
         MediaAsset(
             id = asset.localIdentifier,
             kind = if (isVideo) MediaKind.VIDEO else MediaKind.PHOTO,
             takenAtMillis = ((asset.creationDate?.timeIntervalSince1970 ?: 0.0) * 1_000).toLong(),
-            sizeBytes = asset.fileSizeBytes(),
+            sizeBytes = 0,
             durationMillis = (asset.duration * 1_000).toLong().takeIf { isVideo },
             isLive = asset.mediaSubtypes.toLong() and PHAssetMediaSubtypePhotoLive.toLong() != 0L,
         )

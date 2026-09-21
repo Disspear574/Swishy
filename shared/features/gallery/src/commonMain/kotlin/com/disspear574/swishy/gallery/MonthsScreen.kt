@@ -9,10 +9,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.decisions.formatSize
 import com.disspear574.swishy.designsystem.components.EmptyState
@@ -20,9 +19,8 @@ import com.disspear574.swishy.designsystem.components.HeroStat
 import com.disspear574.swishy.designsystem.components.MonthRow
 import com.disspear574.swishy.designsystem.components.StatLine
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
-import com.disspear574.swishy.media.MediaLibrary
+import com.disspear574.swishy.media.MediaIndex
 import com.disspear574.swishy.media.MonthKey
-import com.disspear574.swishy.media.MonthSummary
 import com.disspear574.swishy.media.groupIntoMonths
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_open_month
@@ -36,22 +34,29 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun MonthsScreen(
-    library: MediaLibrary,
+    index: MediaIndex,
     store: DecisionStore,
     onOpen: (MonthKey) -> Unit,
     onOpenTrash: () -> Unit,
 ) {
     val spacing = SwishyTheme.spacing
-    var months by remember { mutableStateOf<List<MonthSummary>?>(null) }
-    LaunchedEffect(Unit) {
-        months = library.allAssets()
-            .filter { asset -> store.decisionOf(asset.id) == null }
+
+    LaunchedEffect(Unit) { index.load() }
+    val assets by index.assets.collectAsStateWithLifecycle()
+    val sizes by index.sizes.collectAsStateWithLifecycle()
+
+    val scanned = assets ?: return
+
+    val undecided = remember(scanned, store) {
+        scanned.filter { asset -> store.decisionOf(asset.id) == null }
+    }
+    val months = remember(undecided, sizes) {
+        undecided
+            .map { asset -> asset.copy(sizeBytes = sizes[asset.id] ?: asset.sizeBytes) }
             .groupIntoMonths(TimeZone.currentSystemDefault())
     }
 
-    val loaded = months ?: return
-
-    if (loaded.isEmpty()) {
+    if (months.isEmpty()) {
         EmptyState(
             title = stringResource(Res.string.months_title),
             body = stringResource(Res.string.months_empty),
@@ -59,8 +64,8 @@ internal fun MonthsScreen(
         return
     }
 
-    val totalCount = loaded.sumOf { it.count }
-    val totalBytes = loaded.sumOf { it.sizeBytes }
+    val totalCount = months.sumOf { it.count }
+    val totalBytes = months.sumOf { it.sizeBytes }
     val trashedBytes = store.trashedBytes()
 
     LazyColumn(
@@ -78,10 +83,7 @@ internal fun MonthsScreen(
                 eyebrow = stringResource(Res.string.months_title),
                 value = formatSize(totalBytes).label(),
                 caption = stringResource(Res.string.months_undecided, totalCount),
-                modifier = Modifier.padding(
-                    top = spacing.medium,
-                    bottom = spacing.medium,
-                ),
+                modifier = Modifier.padding(top = spacing.medium, bottom = spacing.medium),
             )
         }
 
@@ -96,7 +98,7 @@ internal fun MonthsScreen(
             }
         }
 
-        items(loaded, key = { "${it.month.year}-${it.month.month}" }) { summary ->
+        items(months, key = { "${it.month.year}-${it.month.month}" }) { summary ->
             val title = summary.month.displayName()
             MonthRow(
                 title = title,

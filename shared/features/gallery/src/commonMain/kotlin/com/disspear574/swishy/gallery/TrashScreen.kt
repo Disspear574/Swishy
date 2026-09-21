@@ -36,6 +36,7 @@ import com.disspear574.swishy.designsystem.components.SwishyText
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.media.DeleteResult
 import com.disspear574.swishy.media.MediaAsset
+import com.disspear574.swishy.media.MediaIndex
 import com.disspear574.swishy.media.MediaLibrary
 import com.disspear574.swishy.media.PhotoCard
 import com.disspear574.swishy.strings.Res
@@ -50,6 +51,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun TrashScreen(
     library: MediaLibrary,
+    index: MediaIndex,
     store: DecisionStore,
     onBack: () -> Unit,
 ) {
@@ -59,7 +61,12 @@ internal fun TrashScreen(
     var outcome by remember { mutableStateOf<DeleteResult?>(null) }
     var assets by remember { mutableStateOf<List<MediaAsset>?>(null) }
 
-    LaunchedEffect(reloadToken) { assets = library.assets(store.trashedIds()) }
+    LaunchedEffect(reloadToken) {
+        index.load()
+        val wanted = store.trashedIds().toHashSet()
+        val byId = (index.assets.value ?: emptyList()).associateBy { it.id }
+        assets = store.trashedIds().mapNotNull(byId::get).filter { it.id in wanted }
+    }
 
     val loaded = assets ?: return
 
@@ -137,6 +144,7 @@ internal fun TrashScreen(
             onOutcome = { result -> outcome = result },
             onDeleted = { ids ->
                 ids.forEach(store::forget)
+                index.invalidate()
                 reloadToken += 1
             },
             modifier = Modifier.padding(horizontal = spacing.screen, vertical = spacing.small),

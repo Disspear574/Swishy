@@ -25,9 +25,10 @@ actual fun PhotoCard(
     modifier: Modifier,
     live: Boolean,
     playingLive: Boolean,
+    preview: Boolean,
 ) {
-    val bitmap: ImageBitmap? by produceState<ImageBitmap?>(initialValue = null, id) {
-        value = decode(id)
+    val bitmap: ImageBitmap? by produceState<ImageBitmap?>(initialValue = null, id, preview) {
+        value = decode(id = id, preview = preview)
     }
 
     Box(modifier) {
@@ -43,7 +44,7 @@ actual fun PhotoCard(
 }
 
 @Suppress("SwallowedException")
-private suspend fun decode(id: String): ImageBitmap? {
+private suspend fun decode(id: String, preview: Boolean): ImageBitmap? {
     val context = MediaContext.appContext ?: return null
     val numericId = id.toLongOrNull() ?: return null
 
@@ -55,7 +56,13 @@ private suspend fun decode(id: String): ImageBitmap? {
         try {
             val source = ImageDecoder.createSource(context.contentResolver, uri)
             ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
-                decoder.setTargetSampleSize(sampleSize(info.size.width, info.size.height))
+                decoder.setTargetSampleSize(
+                    sampleSize(
+                        width = info.size.width,
+                        height = info.size.height,
+                        preview = preview,
+                    ),
+                )
                 decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             }.asImageBitmap()
         } catch (notFound: FileNotFoundException) {
@@ -68,9 +75,11 @@ private suspend fun decode(id: String): ImageBitmap? {
     }
 }
 
-private fun sampleSize(width: Int, height: Int): Int {
+private fun sampleSize(width: Int, height: Int, preview: Boolean): Int {
+    val targetWidth = if (preview) PREVIEW_WIDTH_PX else TARGET_WIDTH_PX
+    val targetHeight = if (preview) PREVIEW_HEIGHT_PX else TARGET_HEIGHT_PX
     var sample = 1
-    while (width / (sample * 2) >= TARGET_WIDTH_PX && height / (sample * 2) >= TARGET_HEIGHT_PX) {
+    while (width / (sample * 2) >= targetWidth && height / (sample * 2) >= targetHeight) {
         sample *= 2
     }
     return sample
@@ -81,3 +90,6 @@ internal val supportsGainmap: Boolean
 
 private const val TARGET_WIDTH_PX = 1080
 private const val TARGET_HEIGHT_PX = 1920
+
+private const val PREVIEW_WIDTH_PX = 360
+private const val PREVIEW_HEIGHT_PX = 640

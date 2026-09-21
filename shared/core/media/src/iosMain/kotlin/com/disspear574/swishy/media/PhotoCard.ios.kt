@@ -33,17 +33,18 @@ actual fun PhotoCard(
     modifier: Modifier,
     live: Boolean,
     playingLive: Boolean,
+    preview: Boolean,
 ) {
-    if (live) {
+    if (live && !preview) {
         LivePhotoCard(id = id, modifier = modifier, playing = playingLive)
     } else {
-        StillPhotoCard(id = id, modifier = modifier)
+        StillPhotoCard(id = id, modifier = modifier, preview = preview)
     }
 }
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
-private fun StillPhotoCard(id: String, modifier: Modifier) {
+private fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
     val view = remember(id) {
         UIImageView().apply {
             contentMode = UIViewContentMode.UIViewContentModeScaleAspectFill
@@ -51,8 +52,8 @@ private fun StillPhotoCard(id: String, modifier: Modifier) {
         }
     }
 
-    LaunchedEffect(id) {
-        requestImage(id)?.let { image ->
+    LaunchedEffect(id, preview) {
+        requestImage(id = id, preview = preview)?.let { image ->
             view.setImage(image)
             view.enableHighDynamicRangeIfSupported()
         }
@@ -96,7 +97,7 @@ private fun LivePhotoCard(id: String, modifier: Modifier, playing: Boolean) {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-private suspend fun requestImage(id: String): UIImage? {
+private suspend fun requestImage(id: String, preview: Boolean): UIImage? {
     val asset = fetchAsset(id) ?: return null
     val options = PHImageRequestOptions().apply {
         deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat
@@ -107,7 +108,11 @@ private suspend fun requestImage(id: String): UIImage? {
     return suspendCancellableCoroutine { continuation ->
         val requestId = PHImageManager.defaultManager().requestImageForAsset(
             asset = asset,
-            targetSize = CGSizeMake(TARGET_WIDTH, TARGET_HEIGHT),
+            targetSize = if (preview) {
+                CGSizeMake(PREVIEW_WIDTH, PREVIEW_HEIGHT)
+            } else {
+                CGSizeMake(TARGET_WIDTH, TARGET_HEIGHT)
+            },
             contentMode = PHImageContentModeAspectFill,
             options = options,
         ) { result, _ -> continuation.resume(result) }
@@ -149,3 +154,6 @@ private fun UIImageView.enableHighDynamicRangeIfSupported() {
 private const val HIGH_DYNAMIC_RANGE = 2
 private const val TARGET_WIDTH = 1080.0
 private const val TARGET_HEIGHT = 1920.0
+
+private const val PREVIEW_WIDTH = 360.0
+private const val PREVIEW_HEIGHT = 640.0

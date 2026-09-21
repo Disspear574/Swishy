@@ -7,6 +7,7 @@ import com.disspear574.swishy.decisions.db.createDecisionStore
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.gallery.GalleryComponent
 import com.disspear574.swishy.gallery.GalleryScreen
+import com.disspear574.swishy.media.MediaIndex
 import com.disspear574.swishy.media.MediaLibrary
 import kotlinx.coroutines.CoroutineScope
 
@@ -14,10 +15,16 @@ import kotlinx.coroutines.CoroutineScope
 fun App(
     component: GalleryComponent,
     library: MediaLibrary,
+    index: MediaIndex,
     store: DecisionStore,
 ) {
     SwishyTheme {
-        GalleryScreen(component = component, library = library, store = store)
+        GalleryScreen(
+            component = component,
+            library = library,
+            index = index,
+            store = store,
+        )
     }
 }
 

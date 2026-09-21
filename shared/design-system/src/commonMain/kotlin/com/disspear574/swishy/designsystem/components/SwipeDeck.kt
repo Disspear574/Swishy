@@ -47,7 +47,7 @@ fun <T : Any> SwipeDeck(
     onVerdict: (T, SwipeVerdict) -> Unit,
     modifier: Modifier = Modifier,
     onProgressChange: (Float) -> Unit = {},
-    content: @Composable (T) -> Unit,
+    content: @Composable (item: T, isTop: Boolean) -> Unit,
 ) {
     val top = items.firstOrNull() ?: return
     val topKey = key(top)
@@ -68,7 +68,7 @@ fun <T : Any> SwipeDeck(
         items.drop(1).take(BEHIND_COUNT).asReversed().forEachIndexed { index, item ->
             val depth = min(BEHIND_COUNT - index, BEHIND_COUNT)
             BehindCard(depth = depth, magnitude = if (reduceMotion) 0f else magnitude) {
-                content(item)
+                content(item, false)
             }
         }
 
@@ -108,7 +108,7 @@ fun <T : Any> SwipeDeck(
                     }
                 }
             },
-            content = { content(top) },
+            content = { content(top, true) },
         )
     }
 }

@@ -17,6 +17,7 @@ import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.designsystem.components.EmptyState
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.designsystem.theme.isReduceMotionEnabled
+import com.disspear574.swishy.media.MediaIndex
 import com.disspear574.swishy.media.MediaLibrary
 import com.disspear574.swishy.media.PermissionState
 import com.disspear574.swishy.strings.Res
@@ -35,6 +36,7 @@ import org.jetbrains.compose.resources.stringResource
 fun GalleryScreen(
     component: GalleryComponent,
     library: MediaLibrary,
+    index: MediaIndex,
     store: DecisionStore,
 ) {
     val scope = rememberCoroutineScope()
@@ -62,7 +64,12 @@ fun GalleryScreen(
                 )
             }
 
-            else -> GalleryStack(component = component, library = library, store = store)
+            else -> GalleryStack(
+                component = component,
+                library = library,
+                index = index,
+                store = store,
+            )
         }
     }
 }
@@ -71,6 +78,7 @@ fun GalleryScreen(
 private fun GalleryStack(
     component: GalleryComponent,
     library: MediaLibrary,
+    index: MediaIndex,
     store: DecisionStore,
 ) {
     val reduceMotion = isReduceMotionEnabled()
@@ -90,7 +98,7 @@ private fun GalleryStack(
         Box(Modifier.fillMaxSize().safeDrawingPadding()) {
             when (val instance = child.instance) {
                 GalleryComponent.Child.Months -> MonthsScreen(
-                    library = library,
+                    index = index,
                     store = store,
                     onOpen = component::openMonth,
                     onOpenTrash = component::openTrash,
@@ -98,12 +106,14 @@ private fun GalleryStack(
 
                 GalleryComponent.Child.Trash -> TrashScreen(
                     library = library,
+                    index = index,
                     store = store,
                     onBack = component::back,
                 )
 
                 is GalleryComponent.Child.Deck -> DeckScreen(
                     library = library,
+                    index = index,
                     store = store,
                     month = instance.month,
                     onBack = component::back,

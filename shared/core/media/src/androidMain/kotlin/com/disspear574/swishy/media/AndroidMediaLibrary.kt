@@ -32,6 +32,11 @@ class AndroidMediaLibrary(
 
     override suspend fun allAssets(): List<MediaAsset> = readAll()
 
+    override suspend fun sizeOf(ids: List<String>): Map<String, Long> {
+        val wanted = ids.toHashSet()
+        return readAll().filter { it.id in wanted }.associate { it.id to it.sizeBytes }
+    }
+
     override suspend fun assets(month: MonthKey): List<MediaAsset> {
         val zone = TimeZone.currentSystemDefault()
         return readAll().filter { asset -> asset.monthKeyIn(zone) == month }
