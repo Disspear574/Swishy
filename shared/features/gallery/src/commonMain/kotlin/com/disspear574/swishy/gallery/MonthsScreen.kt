@@ -23,8 +23,11 @@ import com.disspear574.swishy.media.MediaIndex
 import com.disspear574.swishy.media.MonthKey
 import com.disspear574.swishy.media.groupIntoMonths
 import com.disspear574.swishy.strings.Res
+import com.disspear574.swishy.strings.a11y_open_mix
 import com.disspear574.swishy.strings.a11y_open_month
 import com.disspear574.swishy.strings.a11y_open_trash
+import com.disspear574.swishy.strings.mix_subtitle
+import com.disspear574.swishy.strings.mix_title
 import com.disspear574.swishy.strings.months_empty
 import com.disspear574.swishy.strings.months_title
 import com.disspear574.swishy.strings.months_undecided
@@ -37,6 +40,7 @@ internal fun MonthsScreen(
     index: MediaIndex,
     store: DecisionStore,
     onOpen: (MonthKey) -> Unit,
+    onOpenMix: () -> Unit,
     onOpenTrash: () -> Unit,
 ) {
     val spacing = SwishyTheme.spacing
@@ -84,6 +88,16 @@ internal fun MonthsScreen(
                 value = formatSize(totalBytes).label(),
                 caption = stringResource(Res.string.months_undecided, totalCount),
                 modifier = Modifier.padding(top = spacing.medium, bottom = spacing.medium),
+            )
+        }
+
+        item(key = "mix") {
+            MonthRow(
+                title = stringResource(Res.string.mix_title),
+                subtitle = stringResource(Res.string.mix_subtitle),
+                size = "",
+                onClick = onOpenMix,
+                contentDescription = stringResource(Res.string.a11y_open_mix, totalCount),
             )
         }
 

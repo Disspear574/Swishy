@@ -52,22 +52,25 @@ import com.disspear574.swishy.media.monthKeyIn
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_back
 import com.disspear574.swishy.strings.deck_finished
+import com.disspear574.swishy.strings.deck_finished_all
 import com.disspear574.swishy.strings.deck_hint_keep
 import com.disspear574.swishy.strings.deck_hint_trash
 import com.disspear574.swishy.strings.deck_keep
 import com.disspear574.swishy.strings.deck_progress
 import com.disspear574.swishy.strings.deck_trash
 import com.disspear574.swishy.strings.deck_undo
+import com.disspear574.swishy.strings.mix_title
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
+import kotlin.random.Random
 
 @Composable
 internal fun DeckScreen(
     library: MediaLibrary,
     index: MediaIndex,
     store: DecisionStore,
-    month: MonthKey,
+    month: MonthKey?,
     onBack: () -> Unit,
     onSwipeProgress: (Float) -> Unit,
 ) {
@@ -77,14 +80,21 @@ internal fun DeckScreen(
     var deck by remember(month) { mutableStateOf<Deck?>(null) }
     var reloadToken by remember(month) { mutableIntStateOf(0) }
     var outcome by remember(month) { mutableStateOf<DeleteResult?>(null) }
-    var liveId by remember(month) { mutableStateOf<String?>(null) }
+    var heldId by remember(month) { mutableStateOf<String?>(null) }
 
     val zone = remember { TimeZone.currentSystemDefault() }
     val scanned by index.assets.collectAsStateWithLifecycle()
+    val shuffleSeed = remember(month) { Random.nextLong() }
+
     LaunchedEffect(month, reloadToken, scanned) {
         index.load()
         val all = scanned ?: return@LaunchedEffect
-        deck = Deck.of(all.filter { it.monthKeyIn(zone) == month }, store)
+        val assets = if (month == null) {
+            all.shuffled(Random(shuffleSeed))
+        } else {
+            all.filter { it.monthKeyIn(zone) == month }
+        }
+        deck = Deck.of(assets, store)
     }
 
     var currentSize by remember(month) { mutableLongStateOf(0L) }
@@ -111,7 +121,7 @@ internal fun DeckScreen(
             )
             Spacer(Modifier.width(spacing.medium))
             SwishyText(
-                text = month.displayName(),
+                text = month?.displayName() ?: stringResource(Res.string.mix_title),
                 style = SwishyTheme.typography.title,
                 modifier = Modifier.weight(1f),
             )
@@ -131,6 +141,11 @@ internal fun DeckScreen(
             DeckFinished(
                 library = library,
                 store = store,
+                title = if (month == null) {
+                    stringResource(Res.string.deck_finished_all)
+                } else {
+                    stringResource(Res.string.deck_finished)
+                },
                 outcome = outcome,
                 onOutcome = { result -> outcome = result },
                 onDeleted = { ids ->
@@ -155,7 +170,7 @@ internal fun DeckScreen(
                 trashLabel = stringResource(Res.string.deck_trash),
                 onVerdict = { _, verdict ->
                     onSwipeProgress(0f)
-                    deck = current.decide(
+                    val next = current.decide(
                         decision = if (verdict == SwipeVerdict.Keep) {
                             Decision.KEPT
                         } else {
@@ -163,6 +178,8 @@ internal fun DeckScreen(
                         },
                         sizeBytes = currentSize,
                     )
+                    store.commit()
+                    deck = next
                 },
                 onProgressChange = onSwipeProgress,
             ) { item, isTop ->
@@ -172,10 +189,10 @@ internal fun DeckScreen(
                         .clip(SwishyTheme.shapes.card)
                         .background(colors.surfaceSunk)
                         .then(
-                            if (item.isLive) {
-                                Modifier.holdToPlayLive(
+                            if (isTop && (item.isLive || item.kind == MediaKind.VIDEO)) {
+                                Modifier.holdToPlay(
                                     key = item.id,
-                                    onChange = { held -> liveId = item.id.takeIf { held } },
+                                    onChange = { held -> heldId = item.id.takeIf { held } },
                                 )
                             } else {
                                 Modifier
@@ -183,13 +200,17 @@ internal fun DeckScreen(
                         ),
                 ) {
                     if (item.kind == MediaKind.VIDEO) {
-                        VideoCard(id = item.id, modifier = Modifier.fillMaxSize())
+                        VideoCard(
+                            id = item.id,
+                            modifier = Modifier.fillMaxSize(),
+                            playing = isTop && heldId == item.id,
+                        )
                     } else {
                         PhotoCard(
                             id = item.id,
                             modifier = Modifier.fillMaxSize(),
                             live = item.isLive,
-                            playingLive = liveId == item.id,
+                            playingLive = heldId == item.id,
                             preview = !isTop,
                         )
                     }
@@ -259,6 +280,7 @@ internal fun DeckScreen(
 private fun DeckFinished(
     library: MediaLibrary,
     store: DecisionStore,
+    title: String,
     outcome: DeleteResult?,
     onOutcome: (DeleteResult) -> Unit,
     onDeleted: (List<String>) -> Unit,
@@ -273,7 +295,7 @@ private fun DeckFinished(
         verticalArrangement = Arrangement.spacedBy(spacing.medium, Alignment.CenterVertically),
     ) {
         SwishyText(
-            text = stringResource(Res.string.deck_finished),
+            text = title,
             style = SwishyTheme.typography.title,
         )
         DeleteBar(
@@ -287,7 +309,7 @@ private fun DeckFinished(
     }
 }
 
-private fun Modifier.holdToPlayLive(key: Any, onChange: (Boolean) -> Unit): Modifier =
+private fun Modifier.holdToPlay(key: Any, onChange: (Boolean) -> Unit): Modifier =
     pointerInput(key) {
         awaitEachGesture {
             awaitFirstDown(requireUnconsumed = false)

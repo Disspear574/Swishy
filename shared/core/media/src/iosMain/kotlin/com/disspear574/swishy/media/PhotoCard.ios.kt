@@ -48,7 +48,7 @@ actual fun PhotoCard(
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
-private fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
+internal fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
     var image by remember(id) { mutableStateOf<UIImage?>(null) }
     var frame by remember(id) { mutableStateOf<ImageBitmap?>(null) }
 

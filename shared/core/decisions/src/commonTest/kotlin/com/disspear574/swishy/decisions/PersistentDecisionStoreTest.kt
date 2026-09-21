@@ -65,6 +65,29 @@ class PersistentDecisionStoreTest {
     }
 
     @Test
+    fun `после commit решение уже в базе, без прокрутки планировщика`() = runTest {
+        val dao = FakeDao()
+        val store = PersistentDecisionStore(dao = dao, scope = this, initial = emptyList())
+
+        store.record("a", Decision.TRASHED, sizeBytes = 3_000)
+        store.commit()
+
+        assertEquals(Decision.TRASHED.name, dao.stored["a"]?.decision)
+    }
+
+    @Test
+    fun `записи уходят в базу в порядке решений`() = runTest {
+        val dao = FakeDao()
+        val store = PersistentDecisionStore(dao = dao, scope = this, initial = emptyList())
+
+        store.record("a", Decision.TRASHED, sizeBytes = 1)
+        store.record("a", Decision.KEPT, sizeBytes = 1)
+        store.commit()
+
+        assertEquals(Decision.KEPT.name, dao.stored["a"]?.decision)
+    }
+
+    @Test
     fun `забытое решение исчезает и из базы`() = runTest {
         val dao = FakeDao(listOf(entity("a", Decision.TRASHED)))
         val store = PersistentDecisionStore(dao = dao, scope = this, initial = dao.all())

@@ -115,6 +115,7 @@ private fun GalleryStack(
                     index = index,
                     store = store,
                     onOpen = component::openMonth,
+                    onOpenMix = component::openMix,
                     onOpenTrash = component::openTrash,
                 )
 

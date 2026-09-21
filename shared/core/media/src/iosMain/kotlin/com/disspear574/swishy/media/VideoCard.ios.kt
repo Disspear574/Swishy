@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitViewController
 import kotlinx.cinterop.ExperimentalForeignApi
-import platform.AVFoundation.AVLayerVideoGravityResizeAspectFill
+import platform.AVFoundation.AVLayerVideoGravityResizeAspect
 import platform.AVFoundation.AVPlayer
 import platform.AVFoundation.AVPlayerItemDidPlayToEndTimeNotification
 import platform.AVFoundation.pause
@@ -25,7 +25,12 @@ import platform.Photos.PHVideoRequestOptions
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
-actual fun VideoCard(id: String, modifier: Modifier) {
+actual fun VideoCard(id: String, modifier: Modifier, playing: Boolean) {
+    if (!playing) {
+        StillPhotoCard(id = id, modifier = modifier, preview = false)
+        return
+    }
+
     key(id) {
         VideoCardContent(id = id, modifier = modifier)
     }
@@ -74,7 +79,7 @@ private fun VideoCardContent(id: String, modifier: Modifier) {
             AVPlayerViewController().apply {
                 this.player = player
                 showsPlaybackControls = false
-                videoGravity = AVLayerVideoGravityResizeAspectFill
+                videoGravity = AVLayerVideoGravityResizeAspect
             }
         },
         modifier = modifier,

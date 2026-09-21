@@ -9,6 +9,10 @@
     <string name="months_title">Галерея</string>
     <string name="months_undecided">%1$d не разобрано</string>
     <string name="months_done">Разобрано</string>
+    <string name="mix_title">Вперемешку</string>
+    <string name="mix_subtitle">Случайные кадры за всё время</string>
+    <string name="a11y_open_mix">Разобрать вперемешку, %1$d кадров</string>
+    <string name="deck_finished_all">Всё разобрано</string>
     <string name="months_empty">В галерее нет фото и видео</string>
 
     <string name="trash_banner">В корзине %1$s · %2$s</string>

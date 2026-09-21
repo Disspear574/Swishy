@@ -3,6 +3,7 @@ package com.disspear574.swishy.decisions.db
 import com.disspear574.swishy.decisions.Decision
 import com.disspear574.swishy.decisions.DecisionStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class PersistentDecisionStore internal constructor(
@@ -22,9 +23,11 @@ class PersistentDecisionStore internal constructor(
 
     override fun decisionOf(id: String): Decision? = records[id]?.decision
 
+    private var lastWrite: Job? = null
+
     override fun record(id: String, decision: Decision, sizeBytes: Long) {
         records[id] = Record(decision = decision, sizeBytes = sizeBytes)
-        scope.launch {
+        enqueue {
             dao.put(
                 DecisionEntity(
                     assetId = id,
@@ -38,7 +41,19 @@ class PersistentDecisionStore internal constructor(
 
     override fun forget(id: String) {
         records.remove(id)
-        scope.launch { dao.remove(id) }
+        enqueue { dao.remove(id) }
+    }
+
+    override suspend fun commit() {
+        lastWrite?.join()
+    }
+
+    private fun enqueue(write: suspend () -> Unit) {
+        val previous = lastWrite
+        lastWrite = scope.launch {
+            previous?.join()
+            write()
+        }
     }
 
     override fun trashedIds(): List<String> =

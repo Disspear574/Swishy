@@ -47,7 +47,7 @@ fun <T : Any> SwipeDeck(
     key: (T) -> Any,
     keepLabel: String,
     trashLabel: String,
-    onVerdict: (T, SwipeVerdict) -> Unit,
+    onVerdict: suspend (T, SwipeVerdict) -> Unit,
     modifier: Modifier = Modifier,
     onProgressChange: (Float) -> Unit = {},
     content: @Composable (item: T, isTop: Boolean) -> Unit,

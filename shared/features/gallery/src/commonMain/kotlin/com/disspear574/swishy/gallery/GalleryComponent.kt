@@ -32,6 +32,10 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
         navigation.push(Config.Deck(month))
     }
 
+    fun openMix() {
+        navigation.push(Config.Deck(month = null))
+    }
+
     fun openTrash() {
         navigation.push(Config.Trash)
     }
@@ -43,12 +47,12 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
     sealed interface Config {
         data object Months : Config
         data object Trash : Config
-        data class Deck(val month: MonthKey) : Config
+        data class Deck(val month: MonthKey?) : Config
     }
 
     sealed interface Child {
         data object Months : Child
         data object Trash : Child
-        data class Deck(val month: MonthKey) : Child
+        data class Deck(val month: MonthKey?) : Child
     }
 }

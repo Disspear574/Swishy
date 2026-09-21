@@ -9,6 +9,10 @@
     <string name="months_title">Gallery</string>
     <string name="months_undecided">%1$d to review</string>
     <string name="months_done">Reviewed</string>
+    <string name="mix_title">Shuffle</string>
+    <string name="mix_subtitle">Random shots from all time</string>
+    <string name="a11y_open_mix">Sort shuffled, %1$d items</string>
+    <string name="deck_finished_all">All sorted</string>
     <string name="months_empty">No photos or videos in your gallery</string>
 
     <string name="trash_banner">In trash %1$s · %2$s</string>
