@@ -11,6 +11,7 @@ import platform.Photos.PHAccessLevelReadWrite
 import platform.Photos.PHAsset
 import platform.Photos.PHAssetChangeRequest
 import platform.Photos.PHAssetMediaSubtypePhotoLive
+import platform.Photos.PHAssetMediaSubtypePhotoScreenshot
 import platform.Photos.PHAssetMediaTypeImage
 import platform.Photos.PHAssetMediaTypeVideo
 import platform.Photos.PHAuthorizationStatusAuthorized
@@ -81,7 +82,9 @@ class IosMediaLibrary : MediaLibrary {
             takenAtMillis = ((asset.creationDate?.timeIntervalSince1970 ?: 0.0) * 1_000).toLong(),
             sizeBytes = 0,
             durationMillis = (asset.duration * 1_000).toLong().takeIf { isVideo },
-            isLive = asset.mediaSubtypes.toLong() and PHAssetMediaSubtypePhotoLive.toLong() != 0L,
+            isLive = asset.hasSubtype(PHAssetMediaSubtypePhotoLive),
+            isScreenshot = asset.hasSubtype(PHAssetMediaSubtypePhotoScreenshot),
+            isFavorite = asset.favorite,
         )
     }
 
@@ -127,3 +130,6 @@ class IosMediaLibrary : MediaLibrary {
         const val USER_CANCELLED = 3072L
     }
 }
+
+private fun PHAsset.hasSubtype(subtype: ULong): Boolean =
+    mediaSubtypes.toLong() and subtype.toLong() != 0L

@@ -21,6 +21,8 @@ class AndroidMediaLibrary(
         MediaStore.Files.FileColumns.DATE_MODIFIED,
         MediaStore.Files.FileColumns.SIZE,
         MediaStore.Files.FileColumns.DURATION,
+        MediaStore.Files.FileColumns.RELATIVE_PATH,
+        MediaStore.Files.FileColumns.IS_FAVORITE,
     )
 
     override suspend fun permissionState(): PermissionState = MediaPermissions.state(context)
@@ -69,6 +71,10 @@ class AndroidMediaLibrary(
                 cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
             val sizeIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
             val durationIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DURATION)
+            val pathIndex =
+                cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RELATIVE_PATH)
+            val favoriteIndex =
+                cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.IS_FAVORITE)
 
             while (cursor.moveToNext()) {
                 val isVideo =
@@ -83,6 +89,9 @@ class AndroidMediaLibrary(
                     takenAtMillis = takenAt,
                     sizeBytes = cursor.getLong(sizeIndex),
                     durationMillis = cursor.getLong(durationIndex).takeIf { isVideo && it > 0 },
+                    isScreenshot = cursor.getString(pathIndex)
+                        ?.contains(SCREENSHOTS_FOLDER, ignoreCase = true) == true,
+                    isFavorite = cursor.getInt(favoriteIndex) != 0,
                 )
             }
         }
@@ -125,5 +134,7 @@ class AndroidMediaLibrary(
 
     private companion object {
         const val MILLIS_IN_SECOND = 1_000L
+
+        const val SCREENSHOTS_FOLDER = "Screenshots"
     }
 }

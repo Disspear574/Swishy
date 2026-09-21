@@ -1,5 +1,6 @@
 package com.disspear574.swishy.gallery
 
+import com.disspear574.swishy.media.AlbumKind
 import com.disspear574.swishy.media.MonthKey
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
@@ -23,17 +24,21 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
             when (config) {
                 Config.Months -> Child.Months
                 Config.Trash -> Child.Trash
-                is Config.Deck -> Child.Deck(config.month)
+                is Config.Deck -> Child.Deck(config.source)
             }
         },
     )
 
     fun openMonth(month: MonthKey) {
-        navigation.push(Config.Deck(month))
+        navigation.push(Config.Deck(DeckSource.Month(month)))
+    }
+
+    fun openAlbum(album: AlbumKind) {
+        navigation.push(Config.Deck(DeckSource.Album(album)))
     }
 
     fun openMix() {
-        navigation.push(Config.Deck(month = null))
+        navigation.push(Config.Deck(DeckSource.Mix))
     }
 
     fun openTrash() {
@@ -47,12 +52,12 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
     sealed interface Config {
         data object Months : Config
         data object Trash : Config
-        data class Deck(val month: MonthKey?) : Config
+        data class Deck(val source: DeckSource) : Config
     }
 
     sealed interface Child {
         data object Months : Child
         data object Trash : Child
-        data class Deck(val month: MonthKey?) : Child
+        data class Deck(val source: DeckSource) : Child
     }
 }

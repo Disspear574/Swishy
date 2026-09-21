@@ -7,6 +7,8 @@ data class MediaAsset(
     val sizeBytes: Long,
     val durationMillis: Long?,
     val isLive: Boolean = false,
+    val isScreenshot: Boolean = false,
+    val isFavorite: Boolean = false,
 )
 
 enum class MediaKind { PHOTO, VIDEO }

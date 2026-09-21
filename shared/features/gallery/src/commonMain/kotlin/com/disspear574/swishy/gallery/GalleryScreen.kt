@@ -116,6 +116,7 @@ private fun GalleryStack(
                     store = store,
                     onOpen = component::openMonth,
                     onOpenMix = component::openMix,
+                    onOpenAlbum = component::openAlbum,
                     onOpenTrash = component::openTrash,
                 )
 
@@ -130,7 +131,7 @@ private fun GalleryStack(
                     library = library,
                     index = index,
                     store = store,
-                    month = instance.month,
+                    source = instance.source,
                     onBack = component::back,
                     onSwipeProgress = onSwipeProgress,
                 )

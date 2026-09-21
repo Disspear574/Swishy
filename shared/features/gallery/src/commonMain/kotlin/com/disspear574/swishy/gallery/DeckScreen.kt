@@ -45,9 +45,9 @@ import com.disspear574.swishy.media.DeleteResult
 import com.disspear574.swishy.media.MediaIndex
 import com.disspear574.swishy.media.MediaKind
 import com.disspear574.swishy.media.MediaLibrary
-import com.disspear574.swishy.media.MonthKey
 import com.disspear574.swishy.media.PhotoCard
 import com.disspear574.swishy.media.VideoCard
+import com.disspear574.swishy.media.isIn
 import com.disspear574.swishy.media.monthKeyIn
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_back
@@ -70,34 +70,34 @@ internal fun DeckScreen(
     library: MediaLibrary,
     index: MediaIndex,
     store: DecisionStore,
-    month: MonthKey?,
+    source: DeckSource,
     onBack: () -> Unit,
     onSwipeProgress: (Float) -> Unit,
 ) {
     val colors = SwishyTheme.colors
     val spacing = SwishyTheme.spacing
 
-    var deck by remember(month) { mutableStateOf<Deck?>(null) }
-    var reloadToken by remember(month) { mutableIntStateOf(0) }
-    var outcome by remember(month) { mutableStateOf<DeleteResult?>(null) }
-    var heldId by remember(month) { mutableStateOf<String?>(null) }
+    var deck by remember(source) { mutableStateOf<Deck?>(null) }
+    var reloadToken by remember(source) { mutableIntStateOf(0) }
+    var outcome by remember(source) { mutableStateOf<DeleteResult?>(null) }
+    var heldId by remember(source) { mutableStateOf<String?>(null) }
 
     val zone = remember { TimeZone.currentSystemDefault() }
     val scanned by index.assets.collectAsStateWithLifecycle()
-    val shuffleSeed = remember(month) { Random.nextLong() }
+    val shuffleSeed = remember(source) { Random.nextLong() }
 
-    LaunchedEffect(month, reloadToken, scanned) {
+    LaunchedEffect(source, reloadToken, scanned) {
         index.load()
         val all = scanned ?: return@LaunchedEffect
-        val assets = if (month == null) {
-            all.shuffled(Random(shuffleSeed))
-        } else {
-            all.filter { it.monthKeyIn(zone) == month }
+        val assets = when (source) {
+            is DeckSource.Month -> all.filter { it.monthKeyIn(zone) == source.key }
+            is DeckSource.Album -> all.filter { it.isIn(source.kind) }
+            DeckSource.Mix -> all.shuffled(Random(shuffleSeed))
         }
         deck = Deck.of(assets, store)
     }
 
-    var currentSize by remember(month) { mutableLongStateOf(0L) }
+    var currentSize by remember(source) { mutableLongStateOf(0L) }
 
     val current = deck ?: return
     val asset = current.current
@@ -121,7 +121,11 @@ internal fun DeckScreen(
             )
             Spacer(Modifier.width(spacing.medium))
             SwishyText(
-                text = month?.displayName() ?: stringResource(Res.string.mix_title),
+                text = when (source) {
+                    is DeckSource.Month -> source.key.displayName()
+                    is DeckSource.Album -> source.kind.title()
+                    DeckSource.Mix -> stringResource(Res.string.mix_title)
+                },
                 style = SwishyTheme.typography.title,
                 modifier = Modifier.weight(1f),
             )
@@ -141,10 +145,10 @@ internal fun DeckScreen(
             DeckFinished(
                 library = library,
                 store = store,
-                title = if (month == null) {
-                    stringResource(Res.string.deck_finished_all)
-                } else {
+                title = if (source is DeckSource.Month) {
                     stringResource(Res.string.deck_finished)
+                } else {
+                    stringResource(Res.string.deck_finished_all)
                 },
                 outcome = outcome,
                 onOutcome = { result -> outcome = result },

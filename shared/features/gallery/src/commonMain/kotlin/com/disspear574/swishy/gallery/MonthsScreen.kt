@@ -17,18 +17,24 @@ import com.disspear574.swishy.decisions.formatSize
 import com.disspear574.swishy.designsystem.components.EmptyState
 import com.disspear574.swishy.designsystem.components.HeroStat
 import com.disspear574.swishy.designsystem.components.MonthRow
+import com.disspear574.swishy.designsystem.components.SectionLabel
 import com.disspear574.swishy.designsystem.components.StatLine
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
+import com.disspear574.swishy.media.AlbumKind
 import com.disspear574.swishy.media.MediaIndex
 import com.disspear574.swishy.media.MonthKey
+import com.disspear574.swishy.media.albumSummaries
 import com.disspear574.swishy.media.groupIntoMonths
 import com.disspear574.swishy.strings.Res
+import com.disspear574.swishy.strings.a11y_open_album
 import com.disspear574.swishy.strings.a11y_open_mix
 import com.disspear574.swishy.strings.a11y_open_month
 import com.disspear574.swishy.strings.a11y_open_trash
+import com.disspear574.swishy.strings.albums_section
 import com.disspear574.swishy.strings.mix_subtitle
 import com.disspear574.swishy.strings.mix_title
 import com.disspear574.swishy.strings.months_empty
+import com.disspear574.swishy.strings.months_section
 import com.disspear574.swishy.strings.months_title
 import com.disspear574.swishy.strings.months_undecided
 import com.disspear574.swishy.strings.trash_caption
@@ -41,6 +47,7 @@ internal fun MonthsScreen(
     store: DecisionStore,
     onOpen: (MonthKey) -> Unit,
     onOpenMix: () -> Unit,
+    onOpenAlbum: (AlbumKind) -> Unit,
     onOpenTrash: () -> Unit,
 ) {
     val spacing = SwishyTheme.spacing
@@ -53,6 +60,11 @@ internal fun MonthsScreen(
 
     val undecided = remember(scanned, store) {
         scanned.filter { asset -> store.decisionOf(asset.id) == null }
+    }
+    val albums = remember(undecided, sizes) {
+        undecided
+            .map { asset -> asset.copy(sizeBytes = sizes[asset.id] ?: asset.sizeBytes) }
+            .albumSummaries()
     }
     val months = remember(undecided, sizes) {
         undecided
@@ -110,6 +122,37 @@ internal fun MonthsScreen(
                     contentDescription = stringResource(Res.string.a11y_open_trash),
                 )
             }
+        }
+
+        if (albums.isNotEmpty()) {
+            item(key = "albums") {
+                SectionLabel(
+                    text = stringResource(Res.string.albums_section),
+                    modifier = Modifier.padding(top = spacing.medium),
+                )
+            }
+        }
+
+        items(albums, key = { "album-${it.album.name}" }) { summary ->
+            val title = summary.album.title()
+            MonthRow(
+                title = title,
+                subtitle = stringResource(Res.string.months_undecided, summary.count),
+                size = formatSize(summary.sizeBytes).label(),
+                onClick = { onOpenAlbum(summary.album) },
+                contentDescription = stringResource(
+                    Res.string.a11y_open_album,
+                    title,
+                    summary.count,
+                ),
+            )
+        }
+
+        item(key = "months-label") {
+            SectionLabel(
+                text = stringResource(Res.string.months_section),
+                modifier = Modifier.padding(top = spacing.medium),
+            )
         }
 
         items(months, key = { "${it.month.year}-${it.month.month}" }) { summary ->

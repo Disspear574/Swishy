@@ -9,6 +9,13 @@
     <string name="months_title">Галерея</string>
     <string name="months_undecided">%1$d не разобрано</string>
     <string name="months_done">Разобрано</string>
+    <string name="album_screenshots">Скриншоты</string>
+    <string name="album_videos">Видео</string>
+    <string name="album_live">Живые фото</string>
+    <string name="album_favorites">Избранное</string>
+    <string name="albums_section">Подборки</string>
+    <string name="months_section">Месяцы</string>
+    <string name="a11y_open_album">Разобрать подборку %1$s, %2$d кадров</string>
     <string name="mix_title">Вперемешку</string>
     <string name="mix_subtitle">Случайные кадры за всё время</string>
     <string name="a11y_open_mix">Разобрать вперемешку, %1$d кадров</string>
