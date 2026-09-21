@@ -24,6 +24,7 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
             when (config) {
                 Config.Months -> Child.Months
                 Config.Trash -> Child.Trash
+                Config.Settings -> Child.Settings
                 is Config.Deck -> Child.Deck(config.source)
             }
         },
@@ -45,6 +46,10 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
         navigation.push(Config.Trash)
     }
 
+    fun openSettings() {
+        navigation.push(Config.Settings)
+    }
+
     fun back() {
         navigation.pop()
     }
@@ -52,12 +57,14 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
     sealed interface Config {
         data object Months : Config
         data object Trash : Config
+        data object Settings : Config
         data class Deck(val source: DeckSource) : Config
     }
 
     sealed interface Child {
         data object Months : Child
         data object Trash : Child
+        data object Settings : Child
         data class Deck(val source: DeckSource) : Child
     }
 }

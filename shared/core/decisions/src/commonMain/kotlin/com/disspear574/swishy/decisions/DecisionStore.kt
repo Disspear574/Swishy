@@ -10,6 +10,10 @@ interface DecisionStore {
 
     fun forget(id: String)
 
+    fun forgetAll(decision: Decision)
+
+    fun count(decision: Decision): Int
+
     fun trashedIds(): List<String>
 
     fun trashedBytes(): Long

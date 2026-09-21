@@ -29,6 +29,7 @@ import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_open_album
 import com.disspear574.swishy.strings.a11y_open_mix
 import com.disspear574.swishy.strings.a11y_open_month
+import com.disspear574.swishy.strings.a11y_open_settings
 import com.disspear574.swishy.strings.a11y_open_trash
 import com.disspear574.swishy.strings.albums_section
 import com.disspear574.swishy.strings.mix_subtitle
@@ -37,6 +38,8 @@ import com.disspear574.swishy.strings.months_empty
 import com.disspear574.swishy.strings.months_section
 import com.disspear574.swishy.strings.months_title
 import com.disspear574.swishy.strings.months_undecided
+import com.disspear574.swishy.strings.settings_subtitle
+import com.disspear574.swishy.strings.settings_title
 import com.disspear574.swishy.strings.trash_caption
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
@@ -48,6 +51,7 @@ internal fun MonthsScreen(
     onOpen: (MonthKey) -> Unit,
     onOpenMix: () -> Unit,
     onOpenAlbum: (AlbumKind) -> Unit,
+    onOpenSettings: () -> Unit,
     onOpenTrash: () -> Unit,
 ) {
     val spacing = SwishyTheme.spacing
@@ -167,6 +171,17 @@ internal fun MonthsScreen(
                     title,
                     summary.count,
                 ),
+            )
+        }
+
+        item(key = "settings") {
+            MonthRow(
+                title = stringResource(Res.string.settings_title),
+                subtitle = stringResource(Res.string.settings_subtitle),
+                size = "",
+                onClick = onOpenSettings,
+                contentDescription = stringResource(Res.string.a11y_open_settings),
+                modifier = Modifier.padding(top = spacing.medium),
             )
         }
     }

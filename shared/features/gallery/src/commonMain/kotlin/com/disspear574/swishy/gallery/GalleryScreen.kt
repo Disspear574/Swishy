@@ -117,7 +117,14 @@ private fun GalleryStack(
                     onOpen = component::openMonth,
                     onOpenMix = component::openMix,
                     onOpenAlbum = component::openAlbum,
+                    onOpenSettings = component::openSettings,
                     onOpenTrash = component::openTrash,
+                )
+
+                GalleryComponent.Child.Settings -> SettingsScreen(
+                    store = store,
+                    onBack = component::back,
+                    onChanged = component::back,
                 )
 
                 GalleryComponent.Child.Trash -> TrashScreen(

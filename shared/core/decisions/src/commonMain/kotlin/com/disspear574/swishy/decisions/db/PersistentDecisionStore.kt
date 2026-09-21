@@ -44,6 +44,16 @@ class PersistentDecisionStore internal constructor(
         enqueue { dao.remove(id) }
     }
 
+    override fun forgetAll(decision: Decision) {
+        val forgotten = records.filterValues { it.decision == decision }.keys.toList()
+        if (forgotten.isEmpty()) return
+        records.keys.removeAll(forgotten.toSet())
+        enqueue { dao.removeAll(forgotten) }
+    }
+
+    override fun count(decision: Decision): Int =
+        records.values.count { it.decision == decision }
+
     override suspend fun commit() {
         lastWrite?.join()
     }

@@ -16,6 +16,13 @@ class InMemoryDecisionStore : DecisionStore {
         records.remove(id)
     }
 
+    override fun forgetAll(decision: Decision) {
+        records.entries.removeAll { (_, record) -> record.decision == decision }
+    }
+
+    override fun count(decision: Decision): Int =
+        records.values.count { it.decision == decision }
+
     override fun trashedIds(): List<String> =
         records.filterValues { it.decision == Decision.TRASHED }.keys.toList()
 
