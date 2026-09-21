@@ -12,12 +12,15 @@ settings:
     "ARCHS[sdk=iphonesimulator*]": arm64
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
-    CODE_SIGNING_ALLOWED: "NO"
   configs:
     Debug:
       KOTLIN_FRAMEWORK_DIR: debugFramework
     Release:
       KOTLIN_FRAMEWORK_DIR: releaseFramework
+
+configFiles:
+  Debug: Signing.xcconfig
+  Release: Signing.xcconfig
 
 targets:
   Swishy:

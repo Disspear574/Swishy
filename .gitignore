@@ -21,3 +21,5 @@ DerivedData/
 config/signing.properties
 *.keystore
 *.jks
+
+apps/iosApp/Signing.xcconfig
