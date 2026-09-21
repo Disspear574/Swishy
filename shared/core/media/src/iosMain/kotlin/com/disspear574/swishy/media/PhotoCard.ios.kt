@@ -12,11 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitView
+import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import platform.CoreGraphics.CGSize
 import platform.CoreGraphics.CGSizeMake
-import platform.Photos.PHAsset
 import platform.Photos.PHImageContentModeAspectFill
 import platform.Photos.PHImageContentModeAspectFit
 import platform.Photos.PHImageManager
@@ -54,14 +55,14 @@ internal fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
 
     DisposableEffect(id, preview) {
         val asset = fetchAsset(id)
-        val manager = PHImageManager.defaultManager()
+        val manager = photoManager
         val requestId = asset?.let {
             manager.requestImageForAsset(
                 asset = it,
                 targetSize = if (preview) {
                     CGSizeMake(PREVIEW_WIDTH, PREVIEW_HEIGHT)
                 } else {
-                    CGSizeMake(TARGET_WIDTH, TARGET_HEIGHT)
+                    fullTargetSize()
                 },
                 contentMode = PHImageContentModeAspectFit,
                 options = imageOptions(),
@@ -127,14 +128,14 @@ private fun LivePhotoCard(id: String, modifier: Modifier) {
     }
 }
 
-private fun imageOptions(): PHImageRequestOptions = PHImageRequestOptions().apply {
+internal fun imageOptions(): PHImageRequestOptions = PHImageRequestOptions().apply {
     deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic
     networkAccessAllowed = true
     synchronous = false
 }
 
-private fun fetchAsset(id: String): PHAsset? =
-    PHAsset.fetchAssetsWithLocalIdentifiers(listOf(id), null).firstObject as? PHAsset
+@OptIn(ExperimentalForeignApi::class)
+internal fun fullTargetSize(): CValue<CGSize> = CGSizeMake(TARGET_WIDTH, TARGET_HEIGHT)
 
 private const val TARGET_WIDTH = 1080.0
 private const val TARGET_HEIGHT = 1920.0

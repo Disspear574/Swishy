@@ -27,7 +27,7 @@ import platform.UIKit.UIImageOrientation
 
 @OptIn(ExperimentalForeignApi::class)
 internal fun UIImage.toImageBitmap(): ImageBitmap? {
-    val cgImage = upright()?.CGImage ?: return null
+    val cgImage = upright()?.CGImage ?: redrawn()?.CGImage ?: return null
     val width = CGImageGetWidth(cgImage).toInt()
     val height = CGImageGetHeight(cgImage).toInt()
     if (width <= 0 || height <= 0) return null
@@ -64,12 +64,16 @@ internal fun UIImage.toImageBitmap(): ImageBitmap? {
 @OptIn(ExperimentalForeignApi::class)
 private fun UIImage.upright(): UIImage? {
     if (imageOrientation == UIImageOrientation.UIImageOrientationUp) return this
+    return redrawn()
+}
 
+@OptIn(ExperimentalForeignApi::class)
+private fun UIImage.redrawn(): UIImage? {
     UIGraphicsBeginImageContextWithOptions(size = size, opaque = false, scale = scale)
     size.useContents { drawInRect(CGRectMake(0.0, 0.0, width, height)) }
-    val flattened = UIGraphicsGetImageFromCurrentImageContext()
+    val redrawn = UIGraphicsGetImageFromCurrentImageContext()
     UIGraphicsEndImageContext()
-    return flattened
+    return redrawn
 }
 
 private const val BYTES_PER_PIXEL = 4

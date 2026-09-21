@@ -50,7 +50,7 @@ fun <T : Any> SwipeDeck(
     onVerdict: suspend (T, SwipeVerdict) -> Unit,
     modifier: Modifier = Modifier,
     onProgressChange: (Float) -> Unit = {},
-    content: @Composable (item: T, isTop: Boolean) -> Unit,
+    content: @Composable (item: T, depth: Int) -> Unit,
 ) {
     val top = items.firstOrNull() ?: return
     val topKey = key(top)
@@ -113,7 +113,7 @@ fun <T : Any> SwipeDeck(
                         }
                     },
                 ) {
-                    content(item, depth == 0)
+                    content(item, depth)
                 }
             }
         }

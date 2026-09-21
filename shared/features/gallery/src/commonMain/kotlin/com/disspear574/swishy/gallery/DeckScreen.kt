@@ -49,6 +49,7 @@ import com.disspear574.swishy.media.PhotoCard
 import com.disspear574.swishy.media.VideoCard
 import com.disspear574.swishy.media.isIn
 import com.disspear574.swishy.media.monthKeyIn
+import com.disspear574.swishy.media.prefetchMedia
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_back
 import com.disspear574.swishy.strings.deck_finished
@@ -101,6 +102,8 @@ internal fun DeckScreen(
 
     val current = deck ?: return
     val asset = current.current
+
+    LaunchedEffect(current) { prefetchMedia(current.upcoming(PREFETCH_DEPTH).map { it.id }) }
 
     DisposableEffect(Unit) { onDispose { onSwipeProgress(0f) } }
 
@@ -186,14 +189,14 @@ internal fun DeckScreen(
                     deck = next
                 },
                 onProgressChange = onSwipeProgress,
-            ) { item, isTop ->
+            ) { item, depth ->
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(SwishyTheme.shapes.card)
                         .background(colors.surfaceSunk)
                         .then(
-                            if (isTop && (item.isLive || item.kind == MediaKind.VIDEO)) {
+                            if (depth == 0 && (item.isLive || item.kind == MediaKind.VIDEO)) {
                                 Modifier.holdToPlay(
                                     key = item.id,
                                     onChange = { held -> heldId = item.id.takeIf { held } },
@@ -207,7 +210,7 @@ internal fun DeckScreen(
                         VideoCard(
                             id = item.id,
                             modifier = Modifier.fillMaxSize(),
-                            playing = isTop && heldId == item.id,
+                            playing = depth == 0 && heldId == item.id,
                         )
                     } else {
                         PhotoCard(
@@ -215,7 +218,7 @@ internal fun DeckScreen(
                             modifier = Modifier.fillMaxSize(),
                             live = item.isLive,
                             playingLive = heldId == item.id,
-                            preview = !isTop,
+                            preview = depth >= PREVIEW_DEPTH,
                         )
                     }
                 }
@@ -329,3 +332,7 @@ private fun Modifier.holdToPlay(key: Any, onChange: (Boolean) -> Unit): Modifier
 private const val LIVE_HOLD_MILLIS = 350L
 
 private const val DECK_DEPTH = 3
+
+private const val PREVIEW_DEPTH = 2
+
+private const val PREFETCH_DEPTH = 5
