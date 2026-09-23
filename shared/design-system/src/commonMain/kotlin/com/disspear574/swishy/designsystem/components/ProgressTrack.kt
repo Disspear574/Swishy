@@ -11,7 +11,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.dp
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 
-enum class TrackMark { Pending, Kept, Trashed }
+enum class TrackMark { Pending, Kept, Trashed, Moved }
 
 @Composable
 fun ProgressTrack(
@@ -34,6 +34,7 @@ fun ProgressTrack(
                         TrackMark.Pending -> colors.hairline
                         TrackMark.Kept -> colors.keep
                         TrackMark.Trashed -> colors.trash
+                        TrackMark.Moved -> colors.move
                     },
                     topLeft = Offset(x = index * (cell + gap), y = 0f),
                     size = Size(width = cell, height = size.height),
@@ -45,8 +46,10 @@ fun ProgressTrack(
 
         val kept = marks.count { it == TrackMark.Kept }
         val trashed = marks.count { it == TrackMark.Trashed }
+        val moved = marks.count { it == TrackMark.Moved }
         val keptWidth = size.width * kept / marks.size
         val trashedWidth = size.width * trashed / marks.size
+        val movedWidth = size.width * moved / marks.size
 
         drawRoundRect(color = colors.hairline, size = size, cornerRadius = radius)
         drawRoundRect(
@@ -58,6 +61,12 @@ fun ProgressTrack(
             color = colors.trash,
             topLeft = Offset(x = keptWidth, y = 0f),
             size = Size(width = trashedWidth, height = size.height),
+            cornerRadius = radius,
+        )
+        drawRoundRect(
+            color = colors.move,
+            topLeft = Offset(x = keptWidth + trashedWidth, y = 0f),
+            size = Size(width = movedWidth, height = size.height),
             cornerRadius = radius,
         )
     }

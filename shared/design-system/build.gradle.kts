@@ -13,5 +13,8 @@ kotlin {
         commonDependencies {
             api(libs.bundles.compose.common)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

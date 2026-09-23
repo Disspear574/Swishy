@@ -14,6 +14,7 @@ data class SwishyColors(
     val hairline: Color,
     val keep: Color,
     val trash: Color,
+    val move: Color,
     val onAccent: Color,
     val isDark: Boolean,
 )
@@ -28,6 +29,7 @@ internal val LightColors = SwishyColors(
     hairline = Color(0xFFD6D7DE),
     keep = Color(0xFF1F6FEB),
     trash = Color(0xFFD8412F),
+    move = Color(0xFFB86E00),
     onAccent = Color(0xFFFFFFFF),
     isDark = false,
 )
@@ -42,6 +44,7 @@ internal val DarkColors = SwishyColors(
     hairline = Color(0xFF262B36),
     keep = Color(0xFF4D95FF),
     trash = Color(0xFFF2604C),
+    move = Color(0xFFF0A52C),
     onAccent = Color(0xFF0C0E13),
     isDark = true,
 )

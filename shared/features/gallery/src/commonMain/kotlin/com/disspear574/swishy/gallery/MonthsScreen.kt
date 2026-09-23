@@ -9,7 +9,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.disspear574.swishy.decisions.DecisionStore
@@ -22,7 +24,9 @@ import com.disspear574.swishy.designsystem.components.StatLine
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.media.AlbumKind
 import com.disspear574.swishy.media.MediaIndex
+import com.disspear574.swishy.media.MediaLibrary
 import com.disspear574.swishy.media.MonthKey
+import com.disspear574.swishy.media.UserAlbum
 import com.disspear574.swishy.media.albumSummaries
 import com.disspear574.swishy.media.groupIntoMonths
 import com.disspear574.swishy.strings.Res
@@ -32,7 +36,10 @@ import com.disspear574.swishy.strings.a11y_open_mix
 import com.disspear574.swishy.strings.a11y_open_month
 import com.disspear574.swishy.strings.a11y_open_settings
 import com.disspear574.swishy.strings.a11y_open_trash
+import com.disspear574.swishy.strings.a11y_open_user_album
+import com.disspear574.swishy.strings.album_count
 import com.disspear574.swishy.strings.albums_section
+import com.disspear574.swishy.strings.albums_user_section
 import com.disspear574.swishy.strings.duplicates_subtitle
 import com.disspear574.swishy.strings.duplicates_title
 import com.disspear574.swishy.strings.mix_subtitle
@@ -49,11 +56,13 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun MonthsScreen(
+    library: MediaLibrary,
     index: MediaIndex,
     store: DecisionStore,
     onOpen: (MonthKey) -> Unit,
     onOpenMix: () -> Unit,
     onOpenAlbum: (AlbumKind) -> Unit,
+    onOpenUserAlbum: (UserAlbum) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenDuplicates: () -> Unit,
     onOpenTrash: () -> Unit,
@@ -61,6 +70,8 @@ internal fun MonthsScreen(
     val spacing = SwishyTheme.spacing
 
     LaunchedEffect(Unit) { index.load() }
+    var userAlbums by remember { mutableStateOf<List<UserAlbum>>(emptyList()) }
+    LaunchedEffect(Unit) { if (library.supportsAlbums) userAlbums = library.userAlbums() }
     val assets by index.assets.collectAsStateWithLifecycle()
     val sizes by index.sizes.collectAsStateWithLifecycle()
 
@@ -160,6 +171,29 @@ internal fun MonthsScreen(
                     Res.string.a11y_open_album,
                     title,
                     summary.count,
+                ),
+            )
+        }
+
+        if (userAlbums.isNotEmpty()) {
+            item(key = "user-albums-label") {
+                SectionLabel(
+                    text = stringResource(Res.string.albums_user_section),
+                    modifier = Modifier.padding(top = spacing.medium),
+                )
+            }
+        }
+
+        items(userAlbums, key = { "user-album-${it.id}" }) { album ->
+            MonthRow(
+                title = album.title,
+                subtitle = stringResource(Res.string.album_count, album.count),
+                size = "",
+                onClick = { onOpenUserAlbum(album) },
+                contentDescription = stringResource(
+                    Res.string.a11y_open_user_album,
+                    album.title,
+                    album.count,
                 ),
             )
         }

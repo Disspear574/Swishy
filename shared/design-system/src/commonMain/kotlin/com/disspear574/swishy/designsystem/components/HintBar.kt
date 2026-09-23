@@ -12,6 +12,7 @@ fun HintBar(
     trashHint: String,
     keepHint: String,
     modifier: Modifier = Modifier,
+    moveHint: String? = null,
 ) {
     val colors = SwishyTheme.colors
 
@@ -24,6 +25,13 @@ fun HintBar(
             style = SwishyTheme.typography.micro,
             color = colors.trash,
         )
+        if (moveHint != null) {
+            SwishyText(
+                text = moveHint,
+                style = SwishyTheme.typography.micro,
+                color = colors.move,
+            )
+        }
         SwishyText(
             text = keepHint,
             style = SwishyTheme.typography.micro,

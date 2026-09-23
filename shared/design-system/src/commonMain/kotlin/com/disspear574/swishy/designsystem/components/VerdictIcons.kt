@@ -65,3 +65,31 @@ internal fun TrashIcon(color: Color, size: Dp = 40.dp, modifier: Modifier = Modi
 }
 
 private const val STROKE_RATIO = 0.11f
+
+@Composable
+internal fun MoveIcon(color: Color, size: Dp = 40.dp, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(size)) {
+        val w = this.size.width
+        val h = this.size.height
+        val stroke = Stroke(
+            width = this.size.minDimension * STROKE_RATIO,
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round,
+        )
+        val tray = Path().apply {
+            moveTo(w * 0.20f, h * 0.60f)
+            lineTo(w * 0.20f, h * 0.80f)
+            lineTo(w * 0.80f, h * 0.80f)
+            lineTo(w * 0.80f, h * 0.60f)
+        }
+        val arrow = Path().apply {
+            moveTo(w * 0.50f, h * 0.66f)
+            lineTo(w * 0.50f, h * 0.20f)
+            moveTo(w * 0.34f, h * 0.36f)
+            lineTo(w * 0.50f, h * 0.20f)
+            lineTo(w * 0.66f, h * 0.36f)
+        }
+        drawPath(path = tray, color = color, style = stroke)
+        drawPath(path = arrow, color = color, style = stroke)
+    }
+}

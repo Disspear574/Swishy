@@ -136,4 +136,18 @@ class DeckTest {
         assertEquals(3, deck.total)
         assertEquals(3, deck.decide(Decision.KEPT).total)
     }
+
+    @Test
+    fun `отложенные в альбом кадры видны только там, где об этом попросили`() {
+        val store = InMemoryDecisionStore().apply {
+            record("b", Decision.MOVED, sizeBytes = 1)
+            record("c", Decision.TRASHED, sizeBytes = 1)
+        }
+
+        val months = Deck.of(three, store)
+        val album = Deck.of(three, store, showDecided = setOf(Decision.MOVED))
+
+        assertEquals(listOf("a"), months.upcoming(3).map { it.id })
+        assertEquals(listOf("a", "b"), album.upcoming(3).map { it.id })
+    }
 }

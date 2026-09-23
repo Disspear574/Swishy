@@ -33,6 +33,8 @@ import com.disspear574.swishy.strings.settings_about
 import com.disspear574.swishy.strings.settings_count
 import com.disspear574.swishy.strings.settings_kept_body
 import com.disspear574.swishy.strings.settings_kept_title
+import com.disspear574.swishy.strings.settings_moved_body
+import com.disspear574.swishy.strings.settings_moved_title
 import com.disspear574.swishy.strings.settings_none
 import com.disspear574.swishy.strings.settings_title
 import com.disspear574.swishy.strings.settings_trashed_body
@@ -53,6 +55,7 @@ internal fun SettingsScreen(
     var version by remember { mutableStateOf(0) }
     val kept = remember(version) { store.count(Decision.KEPT) }
     val trashed = remember(version) { store.count(Decision.TRASHED) }
+    val moved = remember(version) { store.count(Decision.MOVED) }
 
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
@@ -76,7 +79,7 @@ internal fun SettingsScreen(
             )
         }
 
-        if (kept == 0 && trashed == 0) {
+        if (kept == 0 && trashed == 0 && moved == 0) {
             SwishyText(
                 text = stringResource(Res.string.settings_none),
                 style = SwishyTheme.typography.body,
@@ -99,6 +102,13 @@ internal fun SettingsScreen(
                 onClick = { pending = Decision.TRASHED },
             )
         }
+        if (moved > 0) {
+            ResetRow(
+                title = stringResource(Res.string.settings_moved_title),
+                subtitle = stringResource(Res.string.settings_count, moved),
+                onClick = { pending = Decision.MOVED },
+            )
+        }
 
         SwishyText(
             text = stringResource(Res.string.settings_about),
@@ -110,15 +120,18 @@ internal fun SettingsScreen(
     }
 
     pending?.let { decision ->
-        val isKept = decision == Decision.KEPT
+        val (titleRes, bodyRes, count) = when (decision) {
+            Decision.KEPT -> Triple(Res.string.settings_kept_title, Res.string.settings_kept_body, kept)
+            Decision.TRASHED -> Triple(
+                Res.string.settings_trashed_title,
+                Res.string.settings_trashed_body,
+                trashed,
+            )
+            Decision.MOVED -> Triple(Res.string.settings_moved_title, Res.string.settings_moved_body, moved)
+        }
         ConfirmDialog(
-            title = stringResource(
-                if (isKept) Res.string.settings_kept_title else Res.string.settings_trashed_title,
-            ),
-            body = stringResource(
-                if (isKept) Res.string.settings_kept_body else Res.string.settings_trashed_body,
-                if (isKept) kept else trashed,
-            ),
+            title = stringResource(titleRes),
+            body = stringResource(bodyRes, count),
             confirmText = stringResource(Res.string.confirm_yes),
             cancelText = stringResource(Res.string.confirm_no),
             onDismiss = { pending = null },

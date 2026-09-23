@@ -14,6 +14,8 @@ class Deck private constructor(
 
     val decided: Int get() = history.size
 
+    val lastDecided: MediaAsset? get() = history.lastOrNull()
+
     val total: Int get() = pending.size + history.size
 
     fun upcoming(count: Int): List<MediaAsset> = pending.take(count)
@@ -39,8 +41,15 @@ class Deck private constructor(
 
     companion object {
 
-        fun of(assets: List<MediaAsset>, store: DecisionStore): Deck = Deck(
-            pending = assets.filter { store.decisionOf(it.id) == null },
+        fun of(
+            assets: List<MediaAsset>,
+            store: DecisionStore,
+            showDecided: Set<Decision> = emptySet(),
+        ): Deck = Deck(
+            pending = assets.filter { asset ->
+                val decision = store.decisionOf(asset.id)
+                decision == null || decision in showDecided
+            },
             store = store,
             history = emptyList(),
         )

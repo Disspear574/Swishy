@@ -7,4 +7,6 @@ sealed interface DeckSource {
     data class Month(val key: MonthKey) : DeckSource
     data object Mix : DeckSource
     data class Album(val kind: AlbumKind) : DeckSource
+
+    data class UserAlbum(val id: String, val title: String) : DeckSource
 }

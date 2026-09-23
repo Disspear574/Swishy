@@ -35,6 +35,10 @@ class GalleryComponent(componentContext: ComponentContext) : ComponentContext by
         navigation.push(Config.Deck(DeckSource.Month(month)))
     }
 
+    fun openUserAlbum(album: com.disspear574.swishy.media.UserAlbum) {
+        navigation.push(Config.Deck(DeckSource.UserAlbum(id = album.id, title = album.title)))
+    }
+
     fun openAlbum(album: AlbumKind) {
         navigation.push(Config.Deck(DeckSource.Album(album)))
     }

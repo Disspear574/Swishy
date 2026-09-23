@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,36 +32,51 @@ import com.disspear574.swishy.decisions.Decision
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.decisions.Deck
 import com.disspear574.swishy.decisions.formatSize
+import com.disspear574.swishy.designsystem.components.AlbumChoice
+import com.disspear574.swishy.designsystem.components.AlbumPickerSheet
 import com.disspear574.swishy.designsystem.components.BackButton
 import com.disspear574.swishy.designsystem.components.HintBar
 import com.disspear574.swishy.designsystem.components.ProgressTrack
 import com.disspear574.swishy.designsystem.components.SwipeDeck
+import com.disspear574.swishy.designsystem.components.SwipeHint
 import com.disspear574.swishy.designsystem.components.SwipeVerdict
 import com.disspear574.swishy.designsystem.components.SwishyButton
 import com.disspear574.swishy.designsystem.components.SwishyButtonTone
 import com.disspear574.swishy.designsystem.components.SwishyText
 import com.disspear574.swishy.designsystem.components.TrackMark
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
+import com.disspear574.swishy.media.AlbumResult
 import com.disspear574.swishy.media.DeleteResult
 import com.disspear574.swishy.media.MediaIndex
 import com.disspear574.swishy.media.MediaKind
 import com.disspear574.swishy.media.MediaLibrary
 import com.disspear574.swishy.media.PhotoCard
+import com.disspear574.swishy.media.UserAlbum
 import com.disspear574.swishy.media.VideoCard
 import com.disspear574.swishy.media.isIn
 import com.disspear574.swishy.media.monthKeyIn
 import com.disspear574.swishy.media.prefetchMedia
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_back
+import com.disspear574.swishy.strings.album_count
+import com.disspear574.swishy.strings.album_create
+import com.disspear574.swishy.strings.album_finished
+import com.disspear574.swishy.strings.album_new_placeholder
+import com.disspear574.swishy.strings.album_picker_title
+import com.disspear574.swishy.strings.confirm_no
 import com.disspear574.swishy.strings.deck_finished
 import com.disspear574.swishy.strings.deck_finished_all
 import com.disspear574.swishy.strings.deck_hint_keep
+import com.disspear574.swishy.strings.deck_hint_move
 import com.disspear574.swishy.strings.deck_hint_trash
 import com.disspear574.swishy.strings.deck_keep
+import com.disspear574.swishy.strings.deck_move
 import com.disspear574.swishy.strings.deck_progress
 import com.disspear574.swishy.strings.deck_trash
 import com.disspear574.swishy.strings.deck_undo
 import com.disspear574.swishy.strings.mix_title
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
@@ -73,15 +89,19 @@ internal fun DeckScreen(
     store: DecisionStore,
     source: DeckSource,
     onBack: () -> Unit,
-    onSwipeProgress: (Float) -> Unit,
+    onHintChange: (SwipeHint) -> Unit,
 ) {
     val colors = SwishyTheme.colors
     val spacing = SwishyTheme.spacing
+    val undoScope = rememberCoroutineScope()
 
     var deck by remember(source) { mutableStateOf<Deck?>(null) }
     var reloadToken by remember(source) { mutableIntStateOf(0) }
     var outcome by remember(source) { mutableStateOf<DeleteResult?>(null) }
     var heldId by remember(source) { mutableStateOf<String?>(null) }
+    var albumPick by remember(source) { mutableStateOf<CompletableDeferred<AlbumChoice?>?>(null) }
+    var albums by remember { mutableStateOf<List<UserAlbum>>(emptyList()) }
+    val movedTo = remember(source) { mutableMapOf<String, String>() }
 
     val zone = remember { TimeZone.currentSystemDefault() }
     val scanned by index.assets.collectAsStateWithLifecycle()
@@ -93,9 +113,18 @@ internal fun DeckScreen(
         val assets = when (source) {
             is DeckSource.Month -> all.filter { it.monthKeyIn(zone) == source.key }
             is DeckSource.Album -> all.filter { it.isIn(source.kind) }
+            is DeckSource.UserAlbum -> {
+                val byId = all.associateBy { it.id }
+                library.albumAssetIds(source.id).mapNotNull(byId::get)
+            }
             DeckSource.Mix -> all.shuffled(Random(shuffleSeed))
         }
-        deck = Deck.of(assets, store)
+        val showDecided = if (source is DeckSource.UserAlbum) {
+            setOf(Decision.MOVED, Decision.KEPT)
+        } else {
+            emptySet()
+        }
+        deck = Deck.of(assets, store, showDecided)
     }
 
     var currentSize by remember(source) { mutableLongStateOf(0L) }
@@ -105,7 +134,7 @@ internal fun DeckScreen(
 
     LaunchedEffect(current) { prefetchMedia(current.upcoming(PREFETCH_DEPTH).map { it.id }) }
 
-    DisposableEffect(Unit) { onDispose { onSwipeProgress(0f) } }
+    DisposableEffect(Unit) { onDispose { onHintChange(SwipeHint.None) } }
 
     LaunchedEffect(asset?.id) {
         val id = asset?.id ?: return@LaunchedEffect
@@ -127,6 +156,7 @@ internal fun DeckScreen(
                 text = when (source) {
                     is DeckSource.Month -> source.key.displayName()
                     is DeckSource.Album -> source.kind.title()
+                    is DeckSource.UserAlbum -> source.title
                     DeckSource.Mix -> stringResource(Res.string.mix_title)
                 },
                 style = SwishyTheme.typography.title,
@@ -148,10 +178,10 @@ internal fun DeckScreen(
             DeckFinished(
                 library = library,
                 store = store,
-                title = if (source is DeckSource.Month) {
-                    stringResource(Res.string.deck_finished)
-                } else {
-                    stringResource(Res.string.deck_finished_all)
+                title = when (source) {
+                    is DeckSource.Month -> stringResource(Res.string.deck_finished)
+                    is DeckSource.UserAlbum -> stringResource(Res.string.album_finished)
+                    else -> stringResource(Res.string.deck_finished_all)
                 },
                 outcome = outcome,
                 onOutcome = { result -> outcome = result },
@@ -175,20 +205,30 @@ internal fun DeckScreen(
                 key = { it.id },
                 keepLabel = stringResource(Res.string.deck_keep),
                 trashLabel = stringResource(Res.string.deck_trash),
-                onVerdict = { _, verdict ->
-                    onSwipeProgress(0f)
-                    val next = current.decide(
-                        decision = if (verdict == SwipeVerdict.Keep) {
-                            Decision.KEPT
-                        } else {
-                            Decision.TRASHED
-                        },
-                        sizeBytes = currentSize,
-                    )
+                moveLabel = if (library.supportsAlbums) stringResource(Res.string.deck_move) else null,
+                onVerdict = { item, verdict ->
+                    onHintChange(SwipeHint.None)
+                    val decision = when (verdict) {
+                        SwipeVerdict.Keep -> Decision.KEPT
+                        SwipeVerdict.Trash -> Decision.TRASHED
+                        SwipeVerdict.Move -> {
+                            val choice = CompletableDeferred<AlbumChoice?>()
+                            albums = library.userAlbums()
+                            albumPick = choice
+                            val picked = choice.await()
+                            albumPick = null
+                            if (picked == null) return@SwipeDeck false
+                            if (!library.addToAlbum(picked.id, listOf(item.id))) return@SwipeDeck false
+                            movedTo[item.id] = picked.id
+                            Decision.MOVED
+                        }
+                    }
+                    val next = current.decide(decision = decision, sizeBytes = currentSize)
                     store.commit()
                     deck = next
+                    true
                 },
-                onProgressChange = onSwipeProgress,
+                onHintChange = onHintChange,
             ) { item, depth ->
                 Box(
                     modifier = Modifier
@@ -230,6 +270,7 @@ internal fun DeckScreen(
                 when (decision) {
                     Decision.KEPT -> TrackMark.Kept
                     Decision.TRASHED -> TrackMark.Trashed
+                    Decision.MOVED -> TrackMark.Moved
                     null -> TrackMark.Pending
                 }
             },
@@ -239,6 +280,7 @@ internal fun DeckScreen(
         HintBar(
             trashHint = stringResource(Res.string.deck_hint_trash),
             keepHint = stringResource(Res.string.deck_hint_keep),
+            moveHint = if (library.supportsAlbums) stringResource(Res.string.deck_hint_move) else null,
             modifier = Modifier.padding(
                 horizontal = spacing.screen,
                 vertical = spacing.medium,
@@ -261,7 +303,14 @@ internal fun DeckScreen(
                 SwishyButton(
                     text = stringResource(Res.string.deck_undo),
                     tone = SwishyButtonTone.Quiet,
-                    onClick = { deck = current.undo() },
+                    onClick = {
+                        current.lastDecided?.let { last ->
+                            movedTo.remove(last.id)?.let { albumId ->
+                                undoScope.launch { library.removeFromAlbum(albumId, listOf(last.id)) }
+                            }
+                        }
+                        deck = current.undo()
+                    },
                 )
             }
         }
@@ -281,6 +330,46 @@ internal fun DeckScreen(
             modifier = Modifier.padding(horizontal = spacing.screen, vertical = spacing.small),
         )
     }
+
+    albumPick?.let { pick ->
+        AlbumPicker(
+            pick = pick,
+            albums = albums,
+            library = library,
+            onAlbumsChanged = { albums = it },
+        )
+    }
+}
+
+@Composable
+private fun AlbumPicker(
+    pick: CompletableDeferred<AlbumChoice?>,
+    albums: List<UserAlbum>,
+    library: MediaLibrary,
+    onAlbumsChanged: (List<UserAlbum>) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    AlbumPickerSheet(
+        title = stringResource(Res.string.album_picker_title),
+        albums = albums.map { AlbumChoice(id = it.id, title = it.title, count = it.count) },
+        newAlbumPlaceholder = stringResource(Res.string.album_new_placeholder),
+        createText = stringResource(Res.string.album_create),
+        cancelText = stringResource(Res.string.confirm_no),
+        countText = { count -> stringResource(Res.string.album_count, count) },
+        onPick = { choice -> pick.complete(choice) },
+        onCreate = { title ->
+            scope.launch {
+                when (val result = library.createAlbum(title)) {
+                    is AlbumResult.Done -> {
+                        onAlbumsChanged(albums + result.album)
+                        pick.complete(AlbumChoice(result.album.id, result.album.title, 0))
+                    }
+                    AlbumResult.Cancelled, is AlbumResult.Failed -> Unit
+                }
+            }
+        },
+        onDismiss = { pick.complete(null) },
+    )
 }
 
 @Composable

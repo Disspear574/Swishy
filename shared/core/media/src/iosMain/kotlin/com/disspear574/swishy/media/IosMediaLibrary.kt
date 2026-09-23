@@ -22,7 +22,7 @@ import platform.Photos.PHFetchOptions
 import platform.Photos.PHPhotoLibrary
 import kotlin.coroutines.resume
 
-class IosMediaLibrary : MediaLibrary {
+class IosMediaLibrary : MediaLibrary, AlbumLibrary by IosAlbums {
 
     override suspend fun permissionState(): PermissionState =
         PHPhotoLibrary.authorizationStatusForAccessLevel(PHAccessLevelReadWrite).toState()

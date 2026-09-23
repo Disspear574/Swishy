@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -23,6 +22,8 @@ import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import com.disspear574.swishy.decisions.DecisionStore
 import com.disspear574.swishy.decisions.db.HashStore
 import com.disspear574.swishy.designsystem.components.EmptyState
+import com.disspear574.swishy.designsystem.components.SwipeHint
+import com.disspear574.swishy.designsystem.components.SwipeVerdict
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.designsystem.theme.isReduceMotionEnabled
 import com.disspear574.swishy.media.MediaIndex
@@ -34,7 +35,6 @@ import com.disspear574.swishy.strings.permission_grant
 import com.disspear574.swishy.strings.permission_title
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.abs
 
 @Composable
 fun GalleryScreen(
@@ -46,20 +46,24 @@ fun GalleryScreen(
 ) {
     val scope = rememberCoroutineScope()
     var permission by remember { mutableStateOf<PermissionState?>(null) }
-    var swipeProgress by remember { mutableFloatStateOf(0f) }
+    var swipeHint by remember { mutableStateOf(SwipeHint.None) }
 
     LaunchedEffect(Unit) { permission = library.permissionState() }
 
     val colors = SwishyTheme.colors
-    val wash = if (swipeProgress >= 0f) colors.keep else colors.trash
+    val wash = when (swipeHint.verdict) {
+        SwipeVerdict.Keep, null -> colors.keep
+        SwipeVerdict.Trash -> colors.trash
+        SwipeVerdict.Move -> colors.move
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.ground)
             .drawBehind {
-                if (swipeProgress != 0f) {
-                    drawRect(color = wash, alpha = abs(swipeProgress) * WASH_ALPHA)
+                if (swipeHint.magnitude > 0f) {
+                    drawRect(color = wash, alpha = swipeHint.magnitude * WASH_ALPHA)
                 }
             },
     ) {
@@ -84,7 +88,7 @@ fun GalleryScreen(
                 index = index,
                 store = store,
                 hashStore = hashStore,
-                onSwipeProgress = { value -> swipeProgress = value },
+                onHintChange = { hint -> swipeHint = hint },
             )
         }
     }
@@ -98,7 +102,7 @@ private fun GalleryStack(
     index: MediaIndex,
     store: DecisionStore,
     hashStore: HashStore,
-    onSwipeProgress: (Float) -> Unit,
+    onHintChange: (SwipeHint) -> Unit,
 ) {
     val reduceMotion = isReduceMotionEnabled()
 
@@ -117,11 +121,13 @@ private fun GalleryStack(
         Box(Modifier.fillMaxSize().safeDrawingPadding()) {
             when (val instance = child.instance) {
                 GalleryComponent.Child.Months -> MonthsScreen(
+                    library = library,
                     index = index,
                     store = store,
                     onOpen = component::openMonth,
                     onOpenMix = component::openMix,
                     onOpenAlbum = component::openAlbum,
+                    onOpenUserAlbum = component::openUserAlbum,
                     onOpenSettings = component::openSettings,
                     onOpenDuplicates = component::openDuplicates,
                     onOpenTrash = component::openTrash,
@@ -153,7 +159,7 @@ private fun GalleryStack(
                     store = store,
                     source = instance.source,
                     onBack = component::back,
-                    onSwipeProgress = onSwipeProgress,
+                    onHintChange = onHintChange,
                 )
             }
         }

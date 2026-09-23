@@ -1,6 +1,6 @@
 package com.disspear574.swishy.media
 
-interface MediaLibrary {
+interface MediaLibrary : AlbumLibrary {
 
     suspend fun permissionState(): PermissionState
 

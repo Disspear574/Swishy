@@ -10,7 +10,7 @@ import kotlinx.datetime.TimeZone
 class AndroidMediaLibrary(
     private val context: Context,
     private val requestHost: SystemRequestHost,
-) : MediaLibrary {
+) : MediaLibrary, AlbumLibrary by NoAlbums {
 
     private val collection = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
 
