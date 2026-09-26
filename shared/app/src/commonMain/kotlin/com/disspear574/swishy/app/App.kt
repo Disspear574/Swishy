@@ -31,6 +31,7 @@ fun App(
     }
 }
 
+/** Database-backed stores; one per process so the file never has two connections. */
 class SwishyStores(val decisions: DecisionStore, val hashes: HashStore)
 
 suspend fun createStores(scope: CoroutineScope): SwishyStores {

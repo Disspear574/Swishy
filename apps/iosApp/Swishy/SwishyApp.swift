@@ -11,6 +11,7 @@ struct SwishyApp: App {
     }
 }
 
+/// Hosts the Compose UI; all logic lives in Kotlin.
 struct ComposeView: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIViewController {

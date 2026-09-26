@@ -56,9 +56,11 @@ internal fun DeleteBar(
                 ),
                 enabled = !inFlight,
                 onClick = {
+                    // One system dialog at a time: a second performChanges on iOS fails instead of cancelling.
                     inFlight = true
                     scope.launch {
                         val result = library.delete(trashedIds)
+                        // Hoisted: the deck reloads after deletion and this bar leaves composition.
                         onOutcome(result)
                         if (result is DeleteResult.Deleted) {
                             onDeleted(result.ids)

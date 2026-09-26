@@ -10,9 +10,11 @@ import com.arkivanov.decompose.value.Value
 import com.disspear574.swishy.media.AlbumKind
 import com.disspear574.swishy.media.MonthKey
 
+/** Root navigation stack between the months, deck, duplicates, trash and settings. */
 @OptIn(com.arkivanov.decompose.DelicateDecomposeApi::class)
 class GalleryComponent(componentContext: ComponentContext) : ComponentContext by componentContext {
 
+    // Delicate push is safe: the incoming screen covers the list during the transition, so no double push.
     private val navigation = StackNavigation<Config>()
 
     val stack: Value<ChildStack<Config, Child>> = childStack(

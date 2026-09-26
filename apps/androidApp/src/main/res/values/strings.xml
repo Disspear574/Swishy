@@ -1,3 +1,4 @@
 <resources>
+    <!-- Proper name, same in every language; the manifest cannot read composeResources. -->
     <string name="app_name">Swishy</string>
 </resources>

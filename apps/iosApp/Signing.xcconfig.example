@@ -1,5 +1,4 @@
-//
-//
+// Copy to Signing.xcconfig and set your own team id; the real file is ignored by git.
 
 DEVELOPMENT_TEAM =
 CODE_SIGN_STYLE = Automatic

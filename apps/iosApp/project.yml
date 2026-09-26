@@ -1,3 +1,4 @@
+# xcodegen spec; the generated .xcodeproj is not committed.
 name: Swishy
 options:
   bundleIdPrefix: com.disspear574.swishy
@@ -7,6 +8,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
+    # Framework path and architecture derive from this one value so a device build never links the simulator binary.
     KOTLIN_TARGET: iosArm64
     "KOTLIN_TARGET[sdk=iphonesimulator*]": iosSimulatorArm64
     "ARCHS[sdk=iphonesimulator*]": arm64
@@ -18,6 +20,7 @@ settings:
     Release:
       KOTLIN_FRAMEWORK_DIR: releaseFramework
 
+# Signing comes from the ignored Signing.xcconfig; see Signing.xcconfig.example.
 configFiles:
   Debug: Signing.xcconfig
   Release: Signing.xcconfig

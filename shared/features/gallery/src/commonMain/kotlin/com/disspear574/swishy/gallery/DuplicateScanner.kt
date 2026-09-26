@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+/** Hashes photos that lack a hash, saving in batches so an interrupted pass resumes, then groups duplicates. */
 class DuplicateScanner(
     private val index: MediaIndex,
     private val hashStore: HashStore,
@@ -37,6 +38,7 @@ class DuplicateScanner(
 
         val batch = mutableMapOf<String, ImageHash>()
         missing.forEach { asset ->
+            // null for iCloud-only photos with no local preview; they are retried on the next pass.
             grayThumbnail(asset.id, THUMBNAIL_SIDE)?.let { gray ->
                 val hash = perceptualHash(gray, THUMBNAIL_SIDE)
                 known[asset.id] = hash
@@ -58,7 +60,6 @@ class DuplicateScanner(
 
     private companion object {
         const val THUMBNAIL_SIDE = 32
-
         const val BATCH = 200
     }
 }

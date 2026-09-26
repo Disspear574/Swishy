@@ -139,6 +139,7 @@ internal fun SettingsScreen(
                 store.forgetAll(decision)
                 pending = null
                 version += 1
+                // Commit before screens re-read, or the months list could render unsaved state.
                 scope.launch {
                     store.commit()
                     onChanged()

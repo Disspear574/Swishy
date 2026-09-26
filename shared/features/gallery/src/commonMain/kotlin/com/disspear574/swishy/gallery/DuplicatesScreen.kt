@@ -75,6 +75,7 @@ internal fun DuplicatesScreen(
     var selected by remember { mutableStateOf(emptySet<String>()) }
     var trashed by remember { mutableStateOf(emptySet<String>()) }
 
+    // On iOS sizes arrive in a separate stream, so the scan value is the fallback.
     val sizeOf: (String) -> Long = remember(assets, sizes) {
         val fromScan = assets.orEmpty().associate { asset -> asset.id to asset.sizeBytes }
         val lookup: (String) -> Long = { id -> sizes[id] ?: fromScan[id] ?: 0L }

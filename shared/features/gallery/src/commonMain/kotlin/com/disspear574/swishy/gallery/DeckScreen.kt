@@ -96,15 +96,18 @@ internal fun DeckScreen(
     val undoScope = rememberCoroutineScope()
 
     var deck by remember(source) { mutableStateOf<Deck?>(null) }
+    // After a deletion the source is unchanged, so only this key relaunches the load.
     var reloadToken by remember(source) { mutableIntStateOf(0) }
     var outcome by remember(source) { mutableStateOf<DeleteResult?>(null) }
     var heldId by remember(source) { mutableStateOf<String?>(null) }
     var albumPick by remember(source) { mutableStateOf<CompletableDeferred<AlbumChoice?>?>(null) }
     var albums by remember { mutableStateOf<List<UserAlbum>>(emptyList()) }
+    // Kept only for undo within this visit; the database does not store the album.
     val movedTo = remember(source) { mutableMapOf<String, String>() }
 
     val zone = remember { TimeZone.currentSystemDefault() }
     val scanned by index.assets.collectAsStateWithLifecycle()
+    // Seeded once per visit so the mix does not reshuffle after every decision.
     val shuffleSeed = remember(source) { Random.nextLong() }
 
     LaunchedEffect(source, reloadToken, scanned) {
@@ -119,6 +122,7 @@ internal fun DeckScreen(
             }
             DeckSource.Mix -> all.shuffled(Random(shuffleSeed))
         }
+        // A user album still shows kept and moved photos; only trashed ones are hidden.
         val showDecided = if (source is DeckSource.UserAlbum) {
             setOf(Decision.MOVED, Decision.KEPT)
         } else {
@@ -127,6 +131,7 @@ internal fun DeckScreen(
         deck = Deck.of(assets, store, showDecided)
     }
 
+    // Fetched per photo: iOS lists come without sizes, and a zero would understate the trash.
     var currentSize by remember(source) { mutableLongStateOf(0L) }
 
     val current = deck ?: return
@@ -134,6 +139,7 @@ internal fun DeckScreen(
 
     LaunchedEffect(current) { prefetchMedia(current.upcoming(PREFETCH_DEPTH).map { it.id }) }
 
+    // Clears the wash on leave so it does not linger over the months list.
     DisposableEffect(Unit) { onDispose { onHintChange(SwipeHint.None) } }
 
     LaunchedEffect(asset?.id) {
@@ -212,6 +218,7 @@ internal fun DeckScreen(
                         SwipeVerdict.Keep -> Decision.KEPT
                         SwipeVerdict.Trash -> Decision.TRASHED
                         SwipeVerdict.Move -> {
+                            // Suspends until an album is picked; dismissing returns the card.
                             val choice = CompletableDeferred<AlbumChoice?>()
                             albums = library.userAlbums()
                             albumPick = choice
@@ -224,6 +231,7 @@ internal fun DeckScreen(
                         }
                     }
                     val next = current.decide(decision = decision, sizeBytes = currentSize)
+                    // Committed before the next card so a kill right after the swipe keeps the decision.
                     store.commit()
                     deck = next
                     true
@@ -258,6 +266,7 @@ internal fun DeckScreen(
                             modifier = Modifier.fillMaxSize(),
                             live = item.isLive,
                             playingLive = heldId == item.id,
+                            // The next card loads full size too, so iCloud downloads start before it is on top.
                             preview = depth >= PREVIEW_DEPTH,
                         )
                     }
@@ -364,6 +373,7 @@ private fun AlbumPicker(
                         onAlbumsChanged(albums + result.album)
                         pick.complete(AlbumChoice(result.album.id, result.album.title, 0))
                     }
+                    // The sheet stays open so an existing album can still be picked.
                     AlbumResult.Cancelled, is AlbumResult.Failed -> Unit
                 }
             }
@@ -408,6 +418,7 @@ private fun DeckFinished(
 private fun Modifier.holdToPlay(key: Any, onChange: (Boolean) -> Unit): Modifier =
     pointerInput(key) {
         awaitEachGesture {
+            // Observes without consuming, so the swipe stays the primary gesture.
             awaitFirstDown(requireUnconsumed = false)
             val released = withTimeoutOrNull(LIVE_HOLD_MILLIS) { waitForUpOrCancellation() }
             if (released == null) {
@@ -424,4 +435,5 @@ private const val DECK_DEPTH = 3
 
 private const val PREVIEW_DEPTH = 2
 
+// Headroom for swiping faster than iCloud downloads; warming is cumulative.
 private const val PREFETCH_DEPTH = 8

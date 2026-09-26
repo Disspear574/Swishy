@@ -10,6 +10,7 @@ import com.disspear574.swishy.media.SystemRequestHost
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
+/** Runs system dialogs for the media library; create it with the activity, since registering after onStart crashes. */
 class ActivitySystemRequestHost(activity: ComponentActivity) : SystemRequestHost {
 
     private var pendingSender: ((Boolean) -> Unit)? = null
@@ -27,6 +28,7 @@ class ActivitySystemRequestHost(activity: ComponentActivity) : SystemRequestHost
         activity.registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions(),
         ) { grants ->
+            // any, not all: from API 34 access to selected photos only is a valid grant.
             pendingPermissions?.invoke(grants.values.any { granted -> granted })
             pendingPermissions = null
         }

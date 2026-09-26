@@ -46,6 +46,7 @@ fun GalleryScreen(
 ) {
     val scope = rememberCoroutineScope()
     var permission by remember { mutableStateOf<PermissionState?>(null) }
+    // Hoisted above the insets so the swipe wash also covers the system bar areas.
     var swipeHint by remember { mutableStateOf(SwipeHint.None) }
 
     LaunchedEffect(Unit) { permission = library.permissionState() }
@@ -69,6 +70,7 @@ fun GalleryScreen(
     ) {
         val state = permission
         when {
+            // Blank rather than a spinner: the check takes a frame and a spinner would only flicker.
             state == null -> Unit
 
             state != PermissionState.GRANTED && state != PermissionState.LIMITED -> Box(
@@ -109,6 +111,7 @@ private fun GalleryStack(
     Children(
         stack = component.stack,
         modifier = Modifier.fillMaxSize(),
+        // Reduce Motion keeps only the fade: a whole-screen slide is what that setting avoids.
         animation = stackAnimation(
             animator = if (reduceMotion) {
                 fade(animationSpec = tween(durationMillis = FADE_MILLIS))

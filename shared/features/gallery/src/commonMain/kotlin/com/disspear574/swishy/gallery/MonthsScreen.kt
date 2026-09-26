@@ -70,6 +70,7 @@ internal fun MonthsScreen(
     val spacing = SwishyTheme.spacing
 
     LaunchedEffect(Unit) { index.load() }
+    // Re-read on every return: a swipe up may have just created a new album.
     var userAlbums by remember { mutableStateOf<List<UserAlbum>>(emptyList()) }
     LaunchedEffect(Unit) { if (library.supportsAlbums) userAlbums = library.userAlbums() }
     val assets by index.assets.collectAsStateWithLifecycle()

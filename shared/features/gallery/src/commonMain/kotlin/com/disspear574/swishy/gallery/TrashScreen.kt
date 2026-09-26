@@ -127,6 +127,7 @@ internal fun TrashScreen(
                         .clip(SwishyTheme.shapes.surface)
                         .semantics { contentDescription = restoreLabel }
                         .clickable {
+                            // Restoring forgets the decision: the deck is built from undecided photos.
                             store.forget(asset.id)
                             reloadToken += 1
                         },
