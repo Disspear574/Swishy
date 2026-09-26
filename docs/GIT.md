@@ -41,9 +41,7 @@ Body wrapped at 72 characters: what changed and why.
 - The header is at most 72 characters, lowercase after the colon, no trailing period, and
   reads as "If applied, this commit will …".
 - A blank line after the header. `feat`, `fix`, `perf` and `refactor` need a body.
-- No trailers: no `Signed-off-by`, `Generated with` or tool links, in any spelling. The one
-  exception is a `Co-Authored-By` trailer naming Claude (a model name may follow) with the
-  `noreply@anthropic.com` address, on a commit written together with Claude.
+- No trailers: no `Co-Authored-By`, `Signed-off-by` or tool attribution, in any spelling.
 - The issue number belongs to the branch and the pull request, not the commit.
 - No `wip` and no header that names nothing (`update`, `fixes`, `misc`).
 - A commit is a slice that builds and can be described in one sentence.

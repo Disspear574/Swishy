@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Commit message form: Conventional Commits, English, imperative, 72 columns, one allowed trailer."""
+"""Commit message form: Conventional Commits, English, imperative, 72 columns, no trailers."""
 import os
 import re
 import subprocess
@@ -15,7 +15,6 @@ TRAILER = re.compile(
     r"|written\s+(with|by)|made\s+with|reviewed-by|helped-by)\b", re.I)
 AI_TOOL = re.compile(
     r"\b(claude|anthropic|chatgpt|openai|copilot|gemini|codex)\b|noreply@anthropic|\U0001F916", re.I)
-CLAUDE_COAUTHOR = re.compile(r"^Co-Authored-By: Claude(?: [\w.-]+)* <noreply@anthropic\.com>\s*$")  # publish-check: allow
 ISSUE = re.compile(r"(?<![\w/&])#\d{1,5}\b")
 WIP = re.compile(r"^\W*wip\b", re.I)
 VAGUE = {"misc", "fixes", "fix", "improvements", "update", "updates", "changes", "stuff", "tmp", "temp",
@@ -87,11 +86,9 @@ def problems(message, scopes):
             break
     if any(CYRILLIC.search(l) for l in lines):
         out.append("Commit messages are written in English")
-    checked = [l for l in lines[1:] if not CLAUDE_COAUTHOR.match(l)]
-    if any(TRAILER.match(l) for l in [header] + checked):
-        out.append("No trailers except the Claude co-author line from docs/GIT.md:"
-                   " no Signed-off-by, Generated with, in any spelling")
-    if any(AI_TOOL.search(l) for l in [header] + checked):
+    if any(TRAILER.match(l) for l in lines):
+        out.append("No trailers: no Co-Authored-By, Signed-off-by, Generated with, in any spelling")
+    if any(AI_TOOL.search(l) for l in lines):
         out.append("No tool attribution: the message does not name the AI tool that helped write it")
     if any(ISSUE.search(l) for l in lines):
         out.append("No issue numbers: `#N` and `Closes #N` belong to the branch and the pull request")

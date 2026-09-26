@@ -33,7 +33,7 @@ FORBIDDEN_TEXT = [
     ("signing team", re.compile(r"DEVELOPMENT_?TEAM[\"'=:\s]+[A-Z0-9]{10}\b", re.I)),
     ("device identifier", re.compile(r"\b0000[0-9]{4}-[0-9A-F]{16}\b")),
     ("personal email", PERSONAL_EMAIL),
-    ("AI attribution", re.compile(r"Co-Authored-By:(?! Claude(?: [\w.-]+)* <noreply@anthropic\.com>\s*$).*(Claude|anthropic)|Generated with \[?Claude|claude\.ai/code", re.I)),
+    ("AI attribution", re.compile(r"Co-Authored-By:.*(Claude|anthropic)|Generated with \[?Claude|claude\.ai/code", re.I)),
 ]
 ALLOW = "publish-check: allow"
 SELF = "scripts/publish-check.py"
