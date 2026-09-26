@@ -40,6 +40,7 @@ import com.disspear574.swishy.strings.settings_title
 import com.disspear574.swishy.strings.settings_trashed_body
 import com.disspear574.swishy.strings.settings_trashed_title
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -91,21 +92,21 @@ internal fun SettingsScreen(
         if (kept > 0) {
             ResetRow(
                 title = stringResource(Res.string.settings_kept_title),
-                subtitle = stringResource(Res.string.settings_count, kept),
+                subtitle = pluralStringResource(Res.plurals.settings_count, kept, kept),
                 onClick = { pending = Decision.KEPT },
             )
         }
         if (trashed > 0) {
             ResetRow(
                 title = stringResource(Res.string.settings_trashed_title),
-                subtitle = stringResource(Res.string.settings_count, trashed),
+                subtitle = pluralStringResource(Res.plurals.settings_count, trashed, trashed),
                 onClick = { pending = Decision.TRASHED },
             )
         }
         if (moved > 0) {
             ResetRow(
                 title = stringResource(Res.string.settings_moved_title),
-                subtitle = stringResource(Res.string.settings_count, moved),
+                subtitle = pluralStringResource(Res.plurals.settings_count, moved, moved),
                 onClick = { pending = Decision.MOVED },
             )
         }
@@ -121,17 +122,17 @@ internal fun SettingsScreen(
 
     pending?.let { decision ->
         val (titleRes, bodyRes, count) = when (decision) {
-            Decision.KEPT -> Triple(Res.string.settings_kept_title, Res.string.settings_kept_body, kept)
+            Decision.KEPT -> Triple(Res.string.settings_kept_title, Res.plurals.settings_kept_body, kept)
             Decision.TRASHED -> Triple(
                 Res.string.settings_trashed_title,
-                Res.string.settings_trashed_body,
+                Res.plurals.settings_trashed_body,
                 trashed,
             )
-            Decision.MOVED -> Triple(Res.string.settings_moved_title, Res.string.settings_moved_body, moved)
+            Decision.MOVED -> Triple(Res.string.settings_moved_title, Res.plurals.settings_moved_body, moved)
         }
         ConfirmDialog(
             title = stringResource(titleRes),
-            body = stringResource(bodyRes, count),
+            body = pluralStringResource(bodyRes, count, count),
             confirmText = stringResource(Res.string.confirm_yes),
             cancelText = stringResource(Res.string.confirm_no),
             onDismiss = { pending = null },

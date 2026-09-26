@@ -19,10 +19,19 @@
     <string name="settings_title">Settings</string>
     <string name="settings_subtitle">Reset decisions</string>
     <string name="settings_kept_title">Bring back kept</string>
-    <string name="settings_kept_body">%1$d items will show up for sorting again. The files themselves stay untouched.</string>
+    <plurals name="settings_kept_body">
+        <item quantity="one">%1$d item will show up for sorting again. The file itself stays untouched.</item>
+        <item quantity="other">%1$d items will show up for sorting again. The files themselves stay untouched.</item>
+    </plurals>
     <string name="settings_trashed_title">Clear trash marks</string>
-    <string name="settings_trashed_body">%1$d items will stop waiting for deletion and return to sorting. Already deleted files stay in the system trash — this does not bring them back.</string>
-    <string name="settings_count">%1$d items</string>
+    <plurals name="settings_trashed_body">
+        <item quantity="one">%1$d item will stop waiting for deletion and return to sorting. Already deleted files stay in the system trash — this does not bring them back.</item>
+        <item quantity="other">%1$d items will stop waiting for deletion and return to sorting. Already deleted files stay in the system trash — this does not bring them back.</item>
+    </plurals>
+    <plurals name="settings_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
     <string name="settings_none">No decisions yet</string>
     <string name="settings_about">Decisions are stored on this device only. The app never goes online and sends nothing.</string>
     <string name="confirm_yes">Reset</string>
@@ -34,7 +43,10 @@
     <string name="duplicates_none">No duplicates found</string>
     <string name="duplicates_identical">Identical</string>
     <string name="duplicates_similar">Similar</string>
-    <string name="duplicates_group_size">%1$d items · %2$s</string>
+    <plurals name="duplicates_group_size">
+        <item quantity="one">%1$d item · %2$s</item>
+        <item quantity="other">%1$d items · %2$s</item>
+    </plurals>
     <string name="duplicates_keep_largest">Keep the largest</string>
     <string name="duplicates_trash">To trash · %1$d</string>
     <string name="a11y_open_duplicates">Open duplicates</string>
@@ -44,15 +56,24 @@
     <string name="album_picker_title">Where to?</string>
     <string name="album_new_placeholder">New album</string>
     <string name="album_create">Create</string>
-    <string name="album_count">%1$d items</string>
+    <plurals name="album_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
     <string name="albums_user_section">Albums</string>
     <string name="album_finished">Album sorted</string>
     <string name="settings_moved_title">Bring back set-aside</string>
-    <string name="settings_moved_body">%1$d items will show up for sorting again. They stay in their albums — this only clears the mark in the app.</string>
+    <plurals name="settings_moved_body">
+        <item quantity="one">%1$d item will show up for sorting again. It stays in its album — this only clears the mark in the app.</item>
+        <item quantity="other">%1$d items will show up for sorting again. They stay in their albums — this only clears the mark in the app.</item>
+    </plurals>
     <string name="a11y_open_user_album">Open album %1$s, %2$d items</string>
     <string name="mix_title">Shuffle</string>
     <string name="mix_subtitle">Random shots from all time</string>
-    <string name="a11y_open_mix">Sort shuffled, %1$d items</string>
+    <plurals name="a11y_open_mix">
+        <item quantity="one">Sort shuffled, %1$d item</item>
+        <item quantity="other">Sort shuffled, %1$d items</item>
+    </plurals>
     <string name="deck_finished_all">All sorted</string>
     <string name="months_empty">No photos or videos in your gallery</string>
 
@@ -108,4 +129,5 @@
     <string name="trash_restore_hint">Tap a frame to put it back in the deck</string>
     <string name="a11y_restore">Put the frame back in the deck</string>
     <string name="a11y_open_trash">Open the trash</string>
+    <string name="decimal_separator">.</string>
 </resources>

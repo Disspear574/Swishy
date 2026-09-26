@@ -79,6 +79,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.TimeZone
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.random.Random
 
@@ -364,7 +365,7 @@ private fun AlbumPicker(
         newAlbumPlaceholder = stringResource(Res.string.album_new_placeholder),
         createText = stringResource(Res.string.album_create),
         cancelText = stringResource(Res.string.confirm_no),
-        countText = { count -> stringResource(Res.string.album_count, count) },
+        countText = { count -> pluralStringResource(Res.plurals.album_count, count, count) },
         onPick = { choice -> pick.complete(choice) },
         onCreate = { title ->
             scope.launch {
