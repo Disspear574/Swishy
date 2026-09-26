@@ -52,6 +52,7 @@ import com.disspear574.swishy.strings.duplicates_similar
 import com.disspear574.swishy.strings.duplicates_title
 import com.disspear574.swishy.strings.duplicates_trash
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -200,8 +201,9 @@ private fun Groups(
                             ),
                         )
                         SwishyText(
-                            text = stringResource(
-                                Res.string.duplicates_group_size,
+                            text = pluralStringResource(
+                                Res.plurals.duplicates_group_size,
+                                group.ids.size,
                                 group.ids.size,
                                 formatSize(group.ids.sumOf(sizeOf)).label(),
                             ),

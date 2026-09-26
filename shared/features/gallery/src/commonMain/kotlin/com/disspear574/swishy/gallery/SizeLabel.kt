@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import com.disspear574.swishy.decisions.SizeText
 import com.disspear574.swishy.decisions.SizeUnit
 import com.disspear574.swishy.strings.Res
+import com.disspear574.swishy.strings.decimal_separator
 import com.disspear574.swishy.strings.unit_bytes
 import com.disspear574.swishy.strings.unit_gigabytes
 import com.disspear574.swishy.strings.unit_kilobytes
@@ -20,5 +21,6 @@ internal fun SizeText.label(): String {
             SizeUnit.GIGABYTES -> Res.string.unit_gigabytes
         },
     )
-    return "$value $unitText"
+    val number = if (tenths == 0) "$whole" else "$whole${stringResource(Res.string.decimal_separator)}$tenths"
+    return "$number $unitText"
 }
