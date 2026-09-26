@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+"""Commit message form: Conventional Commits, English, imperative, 72 columns, no trailers."""
+import os
+import re
+import subprocess
+import sys
+
+TYPES = "feat|fix|perf|refactor|test|docs|build|ci|chore|revert"
+HEADER = re.compile(rf"^({TYPES})(\((?P<scope>[a-z0-9-]+)\))?!?: (?P<desc>.+)$")
+BODY_REQUIRED = {"feat", "fix", "perf", "refactor"}
+MAX = 72
+CYRILLIC = re.compile(r"[\u0400-\u04FF]")
+TRAILER = re.compile(
+    r"^\W*(co-?authored-?by|signed-?off-?by|generated\s+(with|by)|assisted[- ]by|created\s+(with|by)"
+    r"|written\s+(with|by)|made\s+with|reviewed-by|helped-by)\b", re.I)
+AI_TOOL = re.compile(
+    r"\b(claude|anthropic|chatgpt|openai|copilot|gemini|codex)\b|noreply@anthropic|\U0001F916", re.I)
+ISSUE = re.compile(r"(?<![\w/&])#\d{1,5}\b")
+WIP = re.compile(r"^\W*wip\b", re.I)
+VAGUE = {"misc", "fixes", "fix", "improvements", "update", "updates", "changes", "stuff", "tmp", "temp",
+         "cleanup"}
+SCOPES_DOC = "docs/GIT.md"
+SCOPES = re.compile(r"^- Scopes:(.*?)(?=^\S|^- |\Z)", re.M | re.S)
+THIRD_PERSON = {
+    "adds", "fixes", "updates", "removes", "makes", "moves", "renames", "changes", "improves",
+    "replaces", "uses", "allows", "prevents", "handles", "supports", "shows", "keeps", "lets",
+    "stops", "creates", "deletes", "sets", "gets", "returns", "implements", "introduces",
+    "refactors", "reads", "writes", "sends", "builds", "runs", "checks", "splits", "drops",
+}
+NOT_PAST = {"embed", "need", "feed", "seed", "speed", "shed", "proceed", "exceed", "succeed", "bleed", "breed", "shred"}
+NOT_GERUND = {"bring", "string", "ring", "sing", "spring", "swing", "wring", "ping"}
+SKIP = re.compile(r"^(Merge |Revert \"|fixup! |squash! |amend! )")
+
+
+def allowed_scopes():
+    root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
+    try:
+        text = open(os.path.join(root or ".", SCOPES_DOC), encoding="utf-8").read()
+    except OSError:
+        return set()
+    m = SCOPES.search(text)
+    return set(re.findall(r"`([a-z0-9-]+)`", m.group(1))) if m else set()
+
+
+def problems(message, scopes):
+    lines = [l for l in message.split("\n") if not l.startswith("#")]
+    while lines and not lines[-1].strip():
+        lines.pop()
+    if not lines or SKIP.match(lines[0]):
+        return []
+    out = []
+    header = lines[0]
+    m = HEADER.match(header)
+    if not m:
+        out.append(f"Header is not `type(scope): description` with type one of {TYPES.replace('|', ', ')}")
+    else:
+        desc = m.group("desc")
+        word = re.sub(r"[^a-z]", "", desc.split()[0].lower()) if desc.split() else ""
+        if desc[:1].isupper():
+            out.append("Description starts with a lowercase letter: `feat: add ...`, not `feat: Add ...`")
+        if desc.endswith("."):
+            out.append("Header does not end with a period")
+        if word in THIRD_PERSON or (word.endswith("ed") and word not in NOT_PAST) or (
+                word.endswith("ing") and word not in NOT_GERUND):
+            out.append(f"Imperative mood: \"If applied, this commit will {desc}\" must read as a sentence")
+        if desc.strip().lower() in VAGUE:
+            out.append(f"`{desc}` says nothing: name what changes, as in `fix(sync): keep the batch unconfirmed`")
+        scope = m.group("scope")
+        if scope and not scopes:
+            out.append(f"Cannot read the scope list (`- Scopes:` line) from {SCOPES_DOC}")
+        elif scope and scope not in scopes:
+            out.append(f"Scope `{scope}` is not in {SCOPES_DOC}: use one of {', '.join(sorted(scopes))},"
+                       " or omit the scope")
+    if WIP.match(header) or (m and WIP.match(m.group("desc"))):
+        out.append("Work in progress is not committed: finish the slice, or keep it uncommitted")
+    if len(header) > MAX:
+        out.append(f"Header is {len(header)} characters; the limit is {MAX}")
+    if len(lines) > 1 and lines[1].strip():
+        out.append("Leave a blank line between the header and the body")
+    body = [l for l in lines[2:]]
+    if m and m.group(1) in BODY_REQUIRED and not any(l.strip() for l in body):
+        out.append(f"`{m.group(1)}` needs a body that says what changed and why")
+    for n, l in enumerate(body, start=3):
+        if len(l) > MAX and " " in l.strip() and "://" not in l:
+            out.append(f"Line {n} is {len(l)} characters; wrap the body at {MAX}")
+            break
+    if any(CYRILLIC.search(l) for l in lines):
+        out.append("Commit messages are written in English")
+    if any(TRAILER.match(l) for l in lines):
+        out.append("No trailers: no Co-Authored-By, Signed-off-by, Generated with, in any spelling")
+    if any(AI_TOOL.search(l) for l in lines):
+        out.append("No tool attribution: the message does not name the AI tool that helped write it")
+    if any(ISSUE.search(l) for l in lines):
+        out.append("No issue numbers: `#N` and `Closes #N` belong to the branch and the pull request")
+    return out
+
+
+def main():
+    message = open(sys.argv[1], encoding="utf-8").read()
+    found = problems(message, allowed_scopes())
+    for p in found:
+        print(f"\n✗ {p}")
+    if found:
+        print("\n  Form: type(scope): imperative description, up to 72 characters,")
+        print("  a blank line, then a body wrapped at 72 that says what changed and why.")
+    sys.exit(1 if found else 0)
+
+
+if __name__ == "__main__":
+    main()

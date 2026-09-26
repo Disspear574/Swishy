@@ -1,0 +1,37 @@
+name: Story
+description: Something that can be checked by hand in the app
+labels: [story]
+body:
+  - type: textarea
+    id: story
+    attributes:
+      label: Story
+      description: Who, what and why.
+      placeholder: I want to <action> so that <result>.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: Every item is checked by hand on a phone.
+      value: "- [ ] "
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options:
+        - iPhone
+        - Android
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Decisions
+      description: What is already decided.
+  - type: textarea
+    id: out
+    attributes:
+      label: Out of scope

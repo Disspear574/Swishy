@@ -1,0 +1,25 @@
+#!/bin/sh
+# Pre-push: scans every commit about to reach the remote for secrets, machine paths and personal data.
+
+remote=$1
+check="$(cd "$(dirname "$0")/.." && pwd)/publish-check.py"
+fail=0
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    case "$local_sha" in *[!0]*) ;; *) continue ;; esac
+    case "$remote_sha" in
+        *[!0]*) git cat-file -e "$remote_sha^{commit}" 2>/dev/null && known=1 || known=0 ;;
+        *) known=0 ;;
+    esac
+    # A new ref, or a remote tip this clone lacks: everything the remote does not have yet.
+    if [ "$known" = 1 ]; then
+        python3 "$check" --range "$remote_sha..$local_sha"
+    else
+        python3 "$check" --range "$local_sha" --not --remotes="$remote"
+    fi || {
+        fail=1
+        printf '\n✗ Push of %s stopped: fix the commits above, or push without that ref\n' "$local_ref"
+    }
+done
+
+exit "$fail"

@@ -1,0 +1,28 @@
+name: Epic
+description: A goal made of several stories, with a clear point of completion
+labels: [epic]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What becomes possible when the epic is closed, in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: Verifiable conditions. If completion cannot be stated, it is not an epic.
+      value: "- "
+    validations:
+      required: true
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Shared decisions
+      description: Agreements that apply to every story of the epic.
+  - type: textarea
+    id: out
+    attributes:
+      label: Out of scope

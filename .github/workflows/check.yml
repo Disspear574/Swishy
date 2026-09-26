@@ -1,0 +1,57 @@
+# Pull request checks on Linux; iOS builds run locally (macOS minutes cost 10x).
+name: check
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  # setup-gradle saves the Gradle cache only from the default branch; pull requests read it.
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Project conventions
+        run: ./scripts/check-conventions.sh
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+      # v5, not v6: v6 moved caching into a proprietary component under separate terms.
+      - uses: gradle/actions/setup-gradle@v5
+      - name: Detekt, host tests and Android builds
+        run: >-
+          ./gradlew --console=plain
+          detekt
+          :shared:core:media:testAndroidHostTest
+          :shared:core:decisions:testAndroidHostTest
+          :shared:design-system:testAndroidHostTest
+          :apps:androidApp:assembleDebug
+          :apps:androidApp:assembleRelease
+      - name: Reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports
+          path: |
+            build/reports/
+            shared/**/build/reports/
+            apps/androidApp/build/reports/
+            apps/androidApp/build/outputs/mapping/release/missing_rules.txt
+          retention-days: 7

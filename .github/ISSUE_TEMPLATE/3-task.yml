@@ -1,0 +1,25 @@
+name: Task
+description: Technical work, usually part of a story or an epic
+labels: [task]
+body:
+  - type: markdown
+    attributes:
+      value: If this task is part of a story, link it as a sub-issue (right panel, Relationships).
+  - type: textarea
+    id: what
+    attributes:
+      label: What to do
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      value: "- [ ] "
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Links, pitfalls, implementation decisions.
