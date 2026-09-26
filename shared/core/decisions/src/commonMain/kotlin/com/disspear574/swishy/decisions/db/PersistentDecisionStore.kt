@@ -75,11 +75,7 @@ class PersistentDecisionStore internal constructor(
         records.values.filter { it.decision == Decision.TRASHED }.sumOf { it.sizeBytes }
 
     // An unknown value is ignored: showing a frame again is reversible, treating it as deleted is not.
-    private fun String.toDecision(): Decision? = when (this) {
-        Decision.KEPT.name -> Decision.KEPT
-        Decision.TRASHED.name -> Decision.TRASHED
-        else -> null
-    }
+    private fun String.toDecision(): Decision? = Decision.entries.firstOrNull { it.name == this }
 }
 
 internal expect fun nowMillis(): Long

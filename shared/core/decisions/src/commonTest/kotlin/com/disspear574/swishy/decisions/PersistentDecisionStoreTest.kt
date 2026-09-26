@@ -53,6 +53,15 @@ class PersistentDecisionStoreTest {
     }
 
     @Test
+    fun `every decision survives a restart`() = runTest {
+        val dao = FakeDao(Decision.entries.map { entity(it.name, it) })
+
+        val store = PersistentDecisionStore(dao = dao, scope = TestScope(), initial = dao.all())
+
+        Decision.entries.forEach { assertEquals(it, store.decisionOf(it.name)) }
+    }
+
+    @Test
     fun `new decision is written to the database`() = runTest {
         val dao = FakeDao()
         val store = PersistentDecisionStore(dao = dao, scope = this, initial = emptyList())
