@@ -52,6 +52,7 @@ import com.disspear574.swishy.strings.settings_subtitle
 import com.disspear574.swishy.strings.settings_title
 import com.disspear574.swishy.strings.trash_caption
 import kotlinx.datetime.TimeZone
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -129,7 +130,7 @@ internal fun MonthsScreen(
                 subtitle = stringResource(Res.string.mix_subtitle),
                 size = "",
                 onClick = onOpenMix,
-                contentDescription = stringResource(Res.string.a11y_open_mix, totalCount),
+                contentDescription = pluralStringResource(Res.plurals.a11y_open_mix, totalCount, totalCount),
             )
         }
 
@@ -188,7 +189,7 @@ internal fun MonthsScreen(
         items(userAlbums, key = { "user-album-${it.id}" }) { album ->
             MonthRow(
                 title = album.title,
-                subtitle = stringResource(Res.string.album_count, album.count),
+                subtitle = pluralStringResource(Res.plurals.album_count, album.count, album.count),
                 size = "",
                 onClick = { onOpenUserAlbum(album) },
                 contentDescription = stringResource(

@@ -19,10 +19,25 @@
     <string name="settings_title">Настройки</string>
     <string name="settings_subtitle">Сброс решений</string>
     <string name="settings_kept_title">Вернуть оставленные</string>
-    <string name="settings_kept_body">%1$d кадров снова появятся в разборе. Сами файлы не меняются.</string>
+    <plurals name="settings_kept_body">
+        <item quantity="one">%1$d кадр снова появится в разборе. Сам файл не меняется.</item>
+        <item quantity="few">%1$d кадра снова появятся в разборе. Сами файлы не меняются.</item>
+        <item quantity="many">%1$d кадров снова появятся в разборе. Сами файлы не меняются.</item>
+        <item quantity="other">%1$d кадра снова появятся в разборе. Сами файлы не меняются.</item>
+    </plurals>
     <string name="settings_trashed_title">Снять пометки «в корзину»</string>
-    <string name="settings_trashed_body">%1$d кадров перестанут ждать удаления и вернутся в разбор. Уже удалённое этим не вернуть — оно в системной корзине.</string>
-    <string name="settings_count">%1$d кадров</string>
+    <plurals name="settings_trashed_body">
+        <item quantity="one">%1$d кадр перестанет ждать удаления и вернётся в разбор. Уже удалённое этим не вернуть — оно в системной корзине.</item>
+        <item quantity="few">%1$d кадра перестанут ждать удаления и вернутся в разбор. Уже удалённое этим не вернуть — оно в системной корзине.</item>
+        <item quantity="many">%1$d кадров перестанут ждать удаления и вернутся в разбор. Уже удалённое этим не вернуть — оно в системной корзине.</item>
+        <item quantity="other">%1$d кадра перестанут ждать удаления и вернутся в разбор. Уже удалённое этим не вернуть — оно в системной корзине.</item>
+    </plurals>
+    <plurals name="settings_count">
+        <item quantity="one">%1$d кадр</item>
+        <item quantity="few">%1$d кадра</item>
+        <item quantity="many">%1$d кадров</item>
+        <item quantity="other">%1$d кадра</item>
+    </plurals>
     <string name="settings_none">Решений пока нет</string>
     <string name="settings_about">Решения хранятся только на этом устройстве. Приложение не выходит в интернет и ничего не отправляет.</string>
     <string name="confirm_yes">Сбросить</string>
@@ -34,7 +49,12 @@
     <string name="duplicates_none">Дубликатов не нашлось</string>
     <string name="duplicates_identical">Одинаковые</string>
     <string name="duplicates_similar">Похожие</string>
-    <string name="duplicates_group_size">%1$d кадров · %2$s</string>
+    <plurals name="duplicates_group_size">
+        <item quantity="one">%1$d кадр · %2$s</item>
+        <item quantity="few">%1$d кадра · %2$s</item>
+        <item quantity="many">%1$d кадров · %2$s</item>
+        <item quantity="other">%1$d кадра · %2$s</item>
+    </plurals>
     <string name="duplicates_keep_largest">Оставить самый крупный</string>
     <string name="duplicates_trash">В корзину · %1$d</string>
     <string name="a11y_open_duplicates">Открыть дубликаты</string>
@@ -44,15 +64,30 @@
     <string name="album_picker_title">Куда отложить?</string>
     <string name="album_new_placeholder">Новый альбом</string>
     <string name="album_create">Создать</string>
-    <string name="album_count">%1$d кадров</string>
+    <plurals name="album_count">
+        <item quantity="one">%1$d кадр</item>
+        <item quantity="few">%1$d кадра</item>
+        <item quantity="many">%1$d кадров</item>
+        <item quantity="other">%1$d кадра</item>
+    </plurals>
     <string name="albums_user_section">Альбомы</string>
     <string name="album_finished">Альбом разобран</string>
     <string name="settings_moved_title">Вернуть отложенные</string>
-    <string name="settings_moved_body">%1$d кадров снова появятся в разборе. Из альбомов они не пропадут — это только отметка в приложении.</string>
+    <plurals name="settings_moved_body">
+        <item quantity="one">%1$d кадр снова появится в разборе. Из альбома он не пропадёт — это только отметка в приложении.</item>
+        <item quantity="few">%1$d кадра снова появятся в разборе. Из альбомов они не пропадут — это только отметка в приложении.</item>
+        <item quantity="many">%1$d кадров снова появятся в разборе. Из альбомов они не пропадут — это только отметка в приложении.</item>
+        <item quantity="other">%1$d кадра снова появятся в разборе. Из альбомов они не пропадут — это только отметка в приложении.</item>
+    </plurals>
     <string name="a11y_open_user_album">Открыть альбом %1$s, %2$d кадров</string>
     <string name="mix_title">Вперемешку</string>
     <string name="mix_subtitle">Случайные кадры за всё время</string>
-    <string name="a11y_open_mix">Разобрать вперемешку, %1$d кадров</string>
+    <plurals name="a11y_open_mix">
+        <item quantity="one">Разобрать вперемешку, %1$d кадр</item>
+        <item quantity="few">Разобрать вперемешку, %1$d кадра</item>
+        <item quantity="many">Разобрать вперемешку, %1$d кадров</item>
+        <item quantity="other">Разобрать вперемешку, %1$d кадра</item>
+    </plurals>
     <string name="deck_finished_all">Всё разобрано</string>
     <string name="months_empty">В галерее нет фото и видео</string>
 
@@ -108,4 +143,5 @@
     <string name="trash_restore_hint">Нажмите на кадр, чтобы вернуть его в колоду</string>
     <string name="a11y_restore">Вернуть кадр в колоду</string>
     <string name="a11y_open_trash">Открыть корзину</string>
+    <string name="decimal_separator">,</string>
 </resources>
