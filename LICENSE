@@ -5,6 +5,11 @@ to copy, modify, merge, publish, distribute, sublicense or sell the source code
 or any build of it, in whole or in part, including through app stores, without
 prior written permission from the copyright holder.
 
+Third-party components keep their own licenses and are not covered by the terms
+above: the fonts in shared/design-system/src/commonMain/composeResources/font are
+licensed under the SIL Open Font License 1.1 (see licenses/fonts), and the Gradle
+wrapper (gradlew, gradlew.bat, gradle/wrapper) under the Apache License 2.0.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT
