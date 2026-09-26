@@ -4,8 +4,9 @@ This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
 https://openfontlicense.org
 
-Swishy ships Onest Regular, Medium, SemiBold and Bold as static instances subset to
-Latin and Cyrillic.
+Swishy ships a Modified Version of Onest: Regular, Medium, SemiBold and Bold as static
+instances subset to Latin and Cyrillic. Onest has no Reserved Font Name, so the family
+name is kept.
 
 -----------------------------------------------------------
 SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
