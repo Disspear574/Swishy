@@ -21,7 +21,7 @@ fun groupDuplicates(assets: List<HashedAsset>): List<DuplicateGroup> {
         if (first != index) union.join(first, index)
     }
 
-    // Hashes within 7 bits share a whole 8-bit band (pigeonhole), so banding misses no close pair.
+    // One more band than the dHash threshold: pairs within the threshold always share a band.
     val byBand = mutableMapOf<Long, MutableList<Int>>()
     assets.forEachIndexed { index, asset ->
         for (band in 0 until BANDS) {
@@ -60,8 +60,9 @@ private fun isSimilar(first: ImageHash, second: ImageHash): Boolean =
         hammingDistance(first.pHash, second.pHash) <= PHASH_THRESHOLD
 
 private fun bandKey(hash: Long, band: Int): Long {
-    val shift = band * BAND_BITS
-    val slice = (hash ushr shift) and BAND_MASK
+    val start = band * HASH_BITS / BANDS
+    val width = (band + 1) * HASH_BITS / BANDS - start
+    val slice = (hash ushr start) and ((1L shl width) - 1)
     // The band index is part of the key: equal bits in different bands are not a match.
     return slice * BANDS + band
 }
@@ -99,8 +100,7 @@ private class DisjointSets(size: Int) {
 private const val DHASH_THRESHOLD = 8
 private const val PHASH_THRESHOLD = 10
 
-private const val BANDS = 8
-private const val BAND_BITS = 8
-private const val BAND_MASK = 0xFFL
+private const val HASH_BITS = 64
+private const val BANDS = DHASH_THRESHOLD + 1
 
 internal const val BAND_OVERFLOW = 400
