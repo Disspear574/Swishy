@@ -128,10 +128,12 @@ Work goes through issues and pull requests; the flow, branch names and commit fo
 ## Third-party fonts
 
 Onest and IBM Plex Mono are used under the SIL Open Font License 1.1; the texts are in
-[licenses/fonts](licenses/fonts). The Plex subset is a Modified Version named Swishy Mono, as
-the license requires.
+[licenses/fonts](licenses/fonts) and the license notice is also embedded in each font file.
+Both are Modified Versions: Onest is cut into static weights and subset, and the Plex subset
+is renamed Swishy Mono because "Plex" is a Reserved Font Name.
 
 ## License
 
 Copyright (c) 2026 Disspear574. All rights reserved. The source is available for reference
-only; see [LICENSE](LICENSE).
+only; see [LICENSE](LICENSE). Third-party fonts and the Gradle wrapper keep their own
+licenses.
