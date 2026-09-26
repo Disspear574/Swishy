@@ -74,7 +74,7 @@
     <string name="delete_done_body">Space is freed once the system “Recently Deleted” album is emptied. You can empty it now.</string>
     <string name="delete_open_recently_deleted">Open “Recently Deleted”</string>
     <string name="delete_failed">Couldn’t delete: %1$s</string>
-    <!-- Month names: the «2026-9» label read as a part number, not a month. -->
+    <!-- Month names. -->
     <string name="month_1">January</string>
     <string name="month_2">February</string>
     <string name="month_3">March</string>
@@ -99,7 +99,7 @@
 
     <string name="trash_caption">In trash · freed after deletion</string>
     <string name="delete_done_caption">Deleted</string>
-    <!-- Direction hint: explains the gesture before the first swipe, not after. -->
+    <!-- Swipe direction hints. -->
     <string name="deck_hint_trash">← To trash</string>
     <string name="deck_hint_keep">Keep →</string>
     <string name="months_hero_caption">to review</string>

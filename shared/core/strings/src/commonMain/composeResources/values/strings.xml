@@ -74,6 +74,7 @@
     <string name="delete_done_body">Место освободится, когда опустеет системная корзина «Недавно удалённые». Её можно опустошить прямо сейчас.</string>
     <string name="delete_open_recently_deleted">Открыть «Недавно удалённые»</string>
     <string name="delete_failed">Не удалось удалить: %1$s</string>
+    <!-- Month names. -->
     <string name="month_1">Январь</string>
     <string name="month_2">Февраль</string>
     <string name="month_3">Март</string>
@@ -98,6 +99,7 @@
 
     <string name="trash_caption">В корзине · освободится после удаления</string>
     <string name="delete_done_caption">Удалено</string>
+    <!-- Swipe direction hints. -->
     <string name="deck_hint_trash">← В корзину</string>
     <string name="deck_hint_keep">Оставить →</string>
     <string name="months_hero_caption">не разобрано</string>

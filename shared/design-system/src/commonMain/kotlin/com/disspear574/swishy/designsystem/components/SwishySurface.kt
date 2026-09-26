@@ -24,6 +24,7 @@ fun SwishySurface(
     val colors = SwishyTheme.colors
     val clickable = if (onClick != null) {
         Modifier
+            // Merged so a screen reader announces one labeled, clickable element.
             .semantics(mergeDescendants = true) {
                 if (contentDescription != null) this.contentDescription = contentDescription
             }

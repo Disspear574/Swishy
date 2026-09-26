@@ -13,6 +13,7 @@ data class SwishyShapes(
     val pill: Shape = RoundedCornerShape(percent = 50),
 )
 
+/** Spacing scale on a 4 dp grid; screen is the base side padding. */
 @Immutable
 data class SwishySpacing(
     val hair: Dp = 2.dp,

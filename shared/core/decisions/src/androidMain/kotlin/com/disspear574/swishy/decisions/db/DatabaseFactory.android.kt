@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+/** Holds the app context for the database, installed once at startup. */
 object DecisionsContext {
 
     @Volatile
@@ -16,7 +17,7 @@ object DecisionsContext {
 
 actual fun databaseBuilder(): RoomDatabase.Builder<SwishyDatabase> {
     val context = requireNotNull(DecisionsContext.appContext) {
-        "DecisionsContext.install() не вызван до создания базы"
+        "DecisionsContext.install() was not called before creating the database"
     }
     return Room.databaseBuilder<SwishyDatabase>(
         context = context,

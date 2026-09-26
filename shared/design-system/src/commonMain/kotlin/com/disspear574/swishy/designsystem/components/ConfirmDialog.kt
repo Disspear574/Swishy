@@ -53,6 +53,7 @@ fun ConfirmDialog(
                     tone = SwishyButtonTone.Quiet,
                     modifier = Modifier.weight(1f),
                 )
+                // Not colored: accent colors mean swipe directions in this app.
                 SwishyButton(
                     text = confirmText,
                     onClick = onConfirm,

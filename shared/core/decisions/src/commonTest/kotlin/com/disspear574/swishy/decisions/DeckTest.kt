@@ -19,7 +19,7 @@ class DeckTest {
     private val three = listOf(asset("a"), asset("b"), asset("c"))
 
     @Test
-    fun `колода начинается с первого кадра`() {
+    fun `deck starts at the first frame`() {
         val deck = Deck.of(three, InMemoryDecisionStore())
 
         assertEquals("a", deck.current?.id)
@@ -28,7 +28,7 @@ class DeckTest {
     }
 
     @Test
-    fun `решение продвигает колоду`() {
+    fun `decision advances the deck`() {
         val deck = Deck.of(three, InMemoryDecisionStore()).decide(Decision.KEPT)
 
         assertEquals("b", deck.current?.id)
@@ -37,7 +37,7 @@ class DeckTest {
     }
 
     @Test
-    fun `уже решённые кадры в колоду не попадают`() {
+    fun `already decided frames are left out of the deck`() {
         val store = InMemoryDecisionStore()
         store.record("a", Decision.KEPT, sizeBytes = 1_000)
 
@@ -48,7 +48,7 @@ class DeckTest {
     }
 
     @Test
-    fun `после последнего кадра колода пуста`() {
+    fun `deck is empty after the last frame`() {
         var deck = Deck.of(three, InMemoryDecisionStore())
         repeat(3) { deck = deck.decide(Decision.KEPT) }
 
@@ -57,7 +57,7 @@ class DeckTest {
     }
 
     @Test
-    fun `вернуть последнее отменяет решение и возвращает тот же кадр`() {
+    fun `undo reverts the decision and brings back the same frame`() {
         val store = InMemoryDecisionStore()
         val deck = Deck.of(three, store)
             .decide(Decision.TRASHED)
@@ -69,14 +69,14 @@ class DeckTest {
     }
 
     @Test
-    fun `вернуть последнее на пустой истории ничего не делает`() {
+    fun `undo on an empty history does nothing`() {
         val deck = Deck.of(three, InMemoryDecisionStore())
 
         assertEquals("a", deck.undo().current?.id)
     }
 
     @Test
-    fun `помеченное в корзину считается в байтах`() {
+    fun `trashed frames are counted in bytes`() {
         val store = InMemoryDecisionStore()
         Deck.of(listOf(asset("a", sizeBytes = 4_000)), store).decide(Decision.TRASHED)
 
@@ -84,7 +84,7 @@ class DeckTest {
     }
 
     @Test
-    fun `размер можно передать явно, если он стал известен позже`() {
+    fun `size can be passed explicitly when it is known later`() {
         val store = InMemoryDecisionStore()
         Deck.of(listOf(asset("a", sizeBytes = 0)), store)
             .decide(Decision.TRASHED, sizeBytes = 7_000)
@@ -93,26 +93,26 @@ class DeckTest {
     }
 
     @Test
-    fun `ближайшие кадры начинаются с текущего`() {
+    fun `upcoming frames start with the current one`() {
         val deck = Deck.of(three, InMemoryDecisionStore())
 
         assertEquals(listOf("a", "b", "c"), deck.upcoming(3).map { it.id })
     }
 
     @Test
-    fun `ближайших не больше, чем осталось`() {
+    fun `upcoming frames never exceed the remaining ones`() {
         val deck = Deck.of(three, InMemoryDecisionStore()).decide(Decision.KEPT)
 
         assertEquals(listOf("b", "c"), deck.upcoming(5).map { it.id })
     }
 
     @Test
-    fun `история решений пуста в начале и вся из null`() {
+    fun `timeline starts as all nulls`() {
         assertEquals(listOf(null, null, null), Deck.of(three, InMemoryDecisionStore()).timeline())
     }
 
     @Test
-    fun `история хранит решения в порядке принятия`() {
+    fun `timeline keeps decisions in the order they were made`() {
         val deck = Deck.of(three, InMemoryDecisionStore())
             .decide(Decision.TRASHED)
             .decide(Decision.KEPT)
@@ -121,7 +121,7 @@ class DeckTest {
     }
 
     @Test
-    fun `отмена убирает решение из истории`() {
+    fun `undo removes the decision from the timeline`() {
         val deck = Deck.of(three, InMemoryDecisionStore())
             .decide(Decision.TRASHED)
             .undo()
@@ -130,7 +130,7 @@ class DeckTest {
     }
 
     @Test
-    fun `общее число кадров не меняется от решений`() {
+    fun `total frame count does not change with decisions`() {
         val deck = Deck.of(three, InMemoryDecisionStore())
 
         assertEquals(3, deck.total)
@@ -138,7 +138,7 @@ class DeckTest {
     }
 
     @Test
-    fun `отложенные в альбом кадры видны только там, где об этом попросили`() {
+    fun `moved frames are shown only where requested`() {
         val store = InMemoryDecisionStore().apply {
             record("b", Decision.MOVED, sizeBytes = 1)
             record("c", Decision.TRASHED, sizeBytes = 1)

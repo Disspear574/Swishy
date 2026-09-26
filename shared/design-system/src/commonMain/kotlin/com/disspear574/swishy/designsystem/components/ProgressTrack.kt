@@ -22,6 +22,7 @@ fun ProgressTrack(
     if (marks.isEmpty()) return
 
     Canvas(modifier.fillMaxWidth().height(TRACK_HEIGHT)) {
+        // Past this count the cells get thinner than a hair, so the track collapses into shares.
         val detailed = marks.size <= MAX_DETAILED_MARKS
         val radius = CornerRadius(size.height / 2f, size.height / 2f)
 

@@ -36,7 +36,7 @@ object SwishyTheme {
         @Composable
         @ReadOnlyComposable
         get() = requireNotNull(LocalSwishyTypography.current) {
-            "SwishyTypography доступна только внутри SwishyTheme"
+            "SwishyTypography is only available inside SwishyTheme"
         }
 
     val shapes: SwishyShapes

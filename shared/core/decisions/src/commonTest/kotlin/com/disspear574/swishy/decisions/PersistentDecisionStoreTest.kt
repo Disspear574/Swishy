@@ -42,7 +42,7 @@ class PersistentDecisionStoreTest {
     )
 
     @Test
-    fun `решения из базы видны сразу после создания`() = runTest {
+    fun `stored decisions are visible right after creation`() = runTest {
         val dao = FakeDao(listOf(entity("a", Decision.KEPT), entity("b", Decision.TRASHED, 2_000)))
 
         val store = PersistentDecisionStore(dao = dao, scope = TestScope(), initial = dao.all())
@@ -53,7 +53,7 @@ class PersistentDecisionStoreTest {
     }
 
     @Test
-    fun `новое решение уходит в базу`() = runTest {
+    fun `new decision is written to the database`() = runTest {
         val dao = FakeDao()
         val store = PersistentDecisionStore(dao = dao, scope = this, initial = emptyList())
 
@@ -65,7 +65,7 @@ class PersistentDecisionStoreTest {
     }
 
     @Test
-    fun `после commit решение уже в базе, без прокрутки планировщика`() = runTest {
+    fun `decision is in the database after commit without advancing the scheduler`() = runTest {
         val dao = FakeDao()
         val store = PersistentDecisionStore(dao = dao, scope = this, initial = emptyList())
 
@@ -76,7 +76,7 @@ class PersistentDecisionStoreTest {
     }
 
     @Test
-    fun `записи уходят в базу в порядке решений`() = runTest {
+    fun `writes reach the database in decision order`() = runTest {
         val dao = FakeDao()
         val store = PersistentDecisionStore(dao = dao, scope = this, initial = emptyList())
 
@@ -88,7 +88,7 @@ class PersistentDecisionStoreTest {
     }
 
     @Test
-    fun `забытое решение исчезает и из базы`() = runTest {
+    fun `forgotten decision is removed from the database`() = runTest {
         val dao = FakeDao(listOf(entity("a", Decision.TRASHED)))
         val store = PersistentDecisionStore(dao = dao, scope = this, initial = dao.all())
 
@@ -100,9 +100,9 @@ class PersistentDecisionStoreTest {
     }
 
     @Test
-    fun `неизвестное значение в колонке решения игнорируется, а не считается решением`() = runTest {
+    fun `unknown decision value is ignored rather than treated as a decision`() = runTest {
         val dao = FakeDao(
-            listOf(DecisionEntity(assetId = "a", decision = "МУСОР", decidedAt = 0, sizeBytes = 1)),
+            listOf(DecisionEntity(assetId = "a", decision = "GARBAGE", decidedAt = 0, sizeBytes = 1)),
         )
 
         val store = PersistentDecisionStore(dao = dao, scope = TestScope(), initial = dao.all())

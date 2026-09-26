@@ -25,6 +25,7 @@ fun HintBar(
             style = SwishyTheme.typography.micro,
             color = colors.trash,
         )
+        // Shown only where the platform supports albums; a hint for a dead gesture is worse than none.
         if (moveHint != null) {
             SwishyText(
                 text = moveHint,

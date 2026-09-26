@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
+/** Room-backed decision store with a synchronous in-memory cache and background writes. */
 class PersistentDecisionStore internal constructor(
     private val dao: DecisionDao,
     private val scope: CoroutineScope,
@@ -61,6 +62,7 @@ class PersistentDecisionStore internal constructor(
     private fun enqueue(write: suspend () -> Unit) {
         val previous = lastWrite
         lastWrite = scope.launch {
+            // Chained so two decisions on one frame cannot reach the database in reverse order.
             previous?.join()
             write()
         }
@@ -72,6 +74,7 @@ class PersistentDecisionStore internal constructor(
     override fun trashedBytes(): Long =
         records.values.filter { it.decision == Decision.TRASHED }.sumOf { it.sizeBytes }
 
+    // An unknown value is ignored: showing a frame again is reversible, treating it as deleted is not.
     private fun String.toDecision(): Decision? = when (this) {
         Decision.KEPT.name -> Decision.KEPT
         Decision.TRASHED.name -> Decision.TRASHED

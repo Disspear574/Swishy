@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+// Glyphs are drawn by hand rather than pulling in an icon library for three shapes.
 @Composable
 internal fun CheckIcon(color: Color, size: Dp = 40.dp, modifier: Modifier = Modifier) {
     Canvas(modifier.size(size)) {

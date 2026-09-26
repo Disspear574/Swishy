@@ -32,6 +32,7 @@ fun SelectableThumb(
         modifier = modifier
             .clip(SwishyTheme.shapes.surface)
             .background(colors.surfaceSunk)
+            // The whole card toggles: a corner checkbox would sit under the horizontal scroll bar.
             .clickable(
                 interactionSource = interaction,
                 indication = null,

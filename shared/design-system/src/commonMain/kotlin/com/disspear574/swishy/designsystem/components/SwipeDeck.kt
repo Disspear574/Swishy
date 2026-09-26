@@ -62,8 +62,10 @@ fun <T : Any> SwipeDeck(
     val reduceMotion = isReduceMotionEnabled()
     val scope = rememberCoroutineScope()
 
+    // Keyed to the top card so a new top card never draws one frame with the old offset.
     val offsetX = remember(topKey) { Animatable(0f) }
     val offsetY = remember(topKey) { Animatable(0f) }
+    // The finger sets a target and the card follows on a spring, so a fast fling reads as a throw.
     var targetX by remember(topKey) { mutableFloatStateOf(0f) }
     var targetY by remember(topKey) { mutableFloatStateOf(0f) }
     var width by remember { mutableFloatStateOf(1f) }
@@ -82,6 +84,7 @@ fun <T : Any> SwipeDeck(
     val visible = items.take(BEHIND_COUNT + 1)
 
     Box(modifier.fillMaxSize()) {
+        // Farthest card first; keyed so a rising card keeps its composition and loaded image.
         visible.withIndex().reversed().forEach { (depth, item) ->
             key(key(item)) {
                 DeckCard(
@@ -98,12 +101,14 @@ fun <T : Any> SwipeDeck(
                     },
                     onDrag = { amount ->
                         targetX += amount.x
+                        // Down has no verdict, but a slight give keeps the card from feeling stuck.
                         targetY += if (amount.y > 0f && targetY >= 0f) amount.y * DOWN_RESISTANCE else amount.y
                         targetY = targetY.coerceAtMost(height * DOWN_LIMIT)
                         scope.launch { follow(offsetX, targetX, reduceMotion) }
                         scope.launch { follow(offsetY, targetY, reduceMotion) }
                     },
                     onRelease = {
+                        // Resolved by the target, not by the visible position lagging behind the finger.
                         val verdict = resolveSwipe(
                             horizontal = targetX / thresholdX,
                             up = -targetY / thresholdY,
@@ -116,6 +121,7 @@ fun <T : Any> SwipeDeck(
                                 settleBack(offsetX, offsetY, reduceMotion)
                                 return@launch
                             }
+                            // Report only after the flight, or the list updates under the card.
                             fly(offsetX, offsetY, verdict, width, height)
                             val accepted = onVerdict(top, verdict)
                             if (!accepted) {
@@ -211,6 +217,7 @@ private fun DeckCard(
         SwipeVerdict.Move -> colors.move
     }
 
+    // Cards behind catch up only partly during the drag; a spring finishes once the verdict lands.
     val advance = if (reduceMotion) 0f else (1f - (1f - magnitude).pow(3)) * DRAG_CATCHUP
     val settle = rememberSettle(depth = depth, reduceMotion = reduceMotion)
 
@@ -229,6 +236,7 @@ private fun DeckCard(
                     translationX = offsetX
                     translationY += offsetY
                     val travel = offsetX / width
+                    // Quadratic arc lift, capped so a flying card never climbs under the title.
                     val lift = travel.coerceIn(-1f, 1f)
                     if (!reduceMotion) {
                         translationY -= lift * lift * ARC_LIFT_DP * density
@@ -280,6 +288,7 @@ private fun DeckCard(
                     SwipeVerdict.Trash -> labels.trash
                     SwipeVerdict.Move -> labels.move ?: labels.keep
                 },
+                // The badge lags behind the photo so it stays on screen at large offsets.
                 modifier = Modifier.graphicsLayer {
                     translationX = -offsetX * VERDICT_PARALLAX
                     translationY = -offsetY * VERDICT_PARALLAX
@@ -320,6 +329,7 @@ private fun Modifier.swipeGesture(
     onDrag: (Offset) -> Unit,
     onRelease: () -> Unit,
 ): Modifier {
+    // pointerInput(Unit) outlives card changes, so it must read the latest callbacks.
     val currentDrag by rememberUpdatedState(onDrag)
     val currentRelease by rememberUpdatedState(onRelease)
     val currentSize by rememberUpdatedState(onSize)
@@ -338,6 +348,7 @@ private fun Modifier.verdictTint(color: Color, magnitude: Float): Modifier =
     graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         .drawWithContent {
             drawContent()
+            // Multiply keeps the photo's detail; a translucent fill would wash it out.
             drawRect(
                 color = color,
                 alpha = magnitude * TINT_ALPHA,
@@ -393,6 +404,7 @@ private fun Verdict(
             }
         }
 
+        // The label sits on its own accent pill; accent text over the same-colored tint is unreadable.
         Box(
             modifier = Modifier
                 .padding(top = SwishyTheme.spacing.medium)
@@ -414,6 +426,7 @@ private fun Verdict(
 
 private const val THRESHOLD_FRACTION = 0.25f
 
+// Smaller than sideways: the card is tall and an upward drag comes less naturally.
 private const val THRESHOLD_FRACTION_UP = 0.18f
 
 private const val DOWN_RESISTANCE = 0.25f
@@ -422,6 +435,7 @@ private const val DOWN_LIMIT = 0.08f
 private const val TILT_PER_WIDTH = 14f
 private const val MAX_TILT = 11f
 
+// 0 pins the badge to the photo, 1 pins it to the screen center.
 private const val VERDICT_PARALLAX = 0.35f
 private const val TINT_ALPHA = 0.55f
 private const val VERDICT_FADE_SPEED = 1.6f
@@ -434,6 +448,7 @@ private const val DRAG_CATCHUP = 0.55f
 
 private const val SCALE_STEP = 0.1f
 
+// Downward offset per depth, in dp.
 private const val LIFT_STEP = 18f
 
 private const val ARC_LIFT_DP = 56f

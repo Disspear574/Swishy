@@ -3,6 +3,7 @@ package com.disspear574.swishy.designsystem.theme
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
+/** App colors; the three accents appear only on card motion, so color always means direction. */
 @Immutable
 data class SwishyColors(
     val ground: Color,
@@ -27,8 +28,10 @@ internal val LightColors = SwishyColors(
     inkDim = Color(0xFF5B5F6B),
     inkFaint = Color(0xFF9195A1),
     hairline = Color(0xFFD6D7DE),
+    // Blue and red rather than green and red, the pair most affected by color blindness.
     keep = Color(0xFF1F6FEB),
     trash = Color(0xFFD8412F),
+    // Amber differs from red mainly in lightness, which every form of color blindness still sees.
     move = Color(0xFFB86E00),
     onAccent = Color(0xFFFFFFFF),
     isDark = false,

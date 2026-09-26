@@ -20,10 +20,10 @@ actual fun databaseBuilder(): RoomDatabase.Builder<SwishyDatabase> {
             create = false,
             error = null,
         ),
-    ) { "Каталог документов недоступен" }
+    ) { "Documents directory is unavailable" }
 
     return Room.databaseBuilder<SwishyDatabase>(
-        name = requireNotNull(documents.path) { "Путь к каталогу документов пуст" } +
+        name = requireNotNull(documents.path) { "Documents directory path is empty" } +
             "/" + DATABASE_NAME,
     )
 }

@@ -22,7 +22,6 @@ import com.disspear574.swishy.designsystem.theme.SwishyTheme
 
 enum class SwishyButtonTone {
     Solid,
-
     Quiet,
 }
 

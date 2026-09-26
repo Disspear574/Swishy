@@ -7,12 +7,12 @@ import kotlin.test.assertNull
 class InMemoryDecisionStoreTest {
 
     @Test
-    fun `незнакомый ассет не имеет решения`() {
+    fun `unknown asset has no decision`() {
         assertNull(InMemoryDecisionStore().decisionOf("a"))
     }
 
     @Test
-    fun `решение запоминается`() {
+    fun `decision is remembered`() {
         val store = InMemoryDecisionStore()
         store.record(id = "a", decision = Decision.TRASHED, sizeBytes = 2_000)
 
@@ -20,7 +20,7 @@ class InMemoryDecisionStoreTest {
     }
 
     @Test
-    fun `объём корзины складывается только из помеченного`() {
+    fun `trash size sums only trashed frames`() {
         val store = InMemoryDecisionStore()
         store.record("a", Decision.TRASHED, sizeBytes = 2_000)
         store.record("b", Decision.KEPT, sizeBytes = 9_000)
@@ -31,7 +31,7 @@ class InMemoryDecisionStoreTest {
     }
 
     @Test
-    fun `повторное решение по тому же ассету заменяет прежнее, не удваивая объём`() {
+    fun `repeated decision on one asset replaces the previous one without doubling the size`() {
         val store = InMemoryDecisionStore()
         store.record("a", Decision.TRASHED, sizeBytes = 2_000)
         store.record("a", Decision.TRASHED, sizeBytes = 2_000)
@@ -40,7 +40,7 @@ class InMemoryDecisionStoreTest {
     }
 
     @Test
-    fun `забытое решение исчезает вместе со своим объёмом`() {
+    fun `forgotten decision disappears with its size`() {
         val store = InMemoryDecisionStore()
         store.record("a", Decision.TRASHED, sizeBytes = 2_000)
         store.forget("a")

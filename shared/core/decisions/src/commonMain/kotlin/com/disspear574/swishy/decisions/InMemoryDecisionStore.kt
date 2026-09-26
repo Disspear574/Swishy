@@ -4,6 +4,7 @@ class InMemoryDecisionStore : DecisionStore {
 
     private data class Record(val decision: Decision, val sizeBytes: Long)
 
+    // Insertion order is the order frames appear in the trash.
     private val records = LinkedHashMap<String, Record>()
 
     override fun decisionOf(id: String): Decision? = records[id]?.decision

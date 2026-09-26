@@ -2,6 +2,7 @@ package com.disspear574.swishy.decisions
 
 import com.disspear574.swishy.media.MediaAsset
 
+/** Immutable deck of undecided frames with this session's decisions kept for undo. */
 class Deck private constructor(
     private val pending: List<MediaAsset>,
     private val store: DecisionStore,
@@ -23,6 +24,7 @@ class Deck private constructor(
     fun timeline(): List<Decision?> =
         history.map { asset -> store.decisionOf(asset.id) } + List(pending.size) { null }
 
+    // On iOS the real size arrives after the scan, so callers may pass it explicitly.
     fun decide(decision: Decision, sizeBytes: Long = current?.sizeBytes ?: 0): Deck {
         val asset = current ?: return this
         store.record(id = asset.id, decision = decision, sizeBytes = sizeBytes)

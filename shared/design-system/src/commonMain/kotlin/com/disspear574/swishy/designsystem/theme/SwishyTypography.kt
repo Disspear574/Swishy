@@ -16,6 +16,7 @@ import com.disspear574.swishy.designsystem.resources.onest_semibold
 import com.disspear574.swishy.designsystem.resources.plex_mono_medium
 import org.jetbrains.compose.resources.Font
 
+/** Type scale: Onest for text and IBM Plex Mono for numbers, both covering Cyrillic. */
 @Immutable
 data class SwishyTypography(
     val display: TextStyle,
@@ -29,6 +30,7 @@ data class SwishyTypography(
 
 @Composable
 internal fun onestFamily(): FontFamily = FontFamily(
+    // Static weights: a resource Font() cannot set the wght axis of a variable font.
     Font(Res.font.onest_regular, FontWeight.Normal),
     Font(Res.font.onest_medium, FontWeight.Medium),
     Font(Res.font.onest_semibold, FontWeight.SemiBold),
@@ -75,6 +77,7 @@ internal fun swishyTypography(): SwishyTypography {
             fontSize = 13.sp,
             fontWeight = FontWeight.Normal,
         ),
+        // Monospaced digits keep counters from jittering on every swipe.
         numeric = TextStyle(
             fontFamily = mono,
             fontSize = 13.sp,
