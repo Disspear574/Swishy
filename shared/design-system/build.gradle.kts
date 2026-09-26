@@ -1,5 +1,3 @@
-import com.disspear574.swishy.convention.external.commonDependencies
-
 plugins {
     alias(libs.plugins.swishy.compose.multiplatform)
 }
@@ -10,11 +8,15 @@ kotlin {
     }
 
     sourceSets {
-        commonDependencies {
+        commonMain.dependencies {
             api(libs.bundles.compose.common)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "com.disspear574.swishy.designsystem.resources"
 }

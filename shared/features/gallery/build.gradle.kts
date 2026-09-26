@@ -1,5 +1,3 @@
-import com.disspear574.swishy.convention.external.commonDependencies
-
 plugins {
     alias(libs.plugins.swishy.compose.multiplatform)
 }
@@ -10,9 +8,10 @@ kotlin {
     }
 
     sourceSets {
-        commonDependencies {
+        commonMain.dependencies {
             implementation(libs.bundles.compose.common)
             implementation(libs.lifecycle.runtime.compose)
+            // api: ComponentContext is part of the component's public signature.
             api(libs.bundles.decompose.full)
             implementation(projects.shared.designSystem)
             implementation(projects.shared.core.strings)

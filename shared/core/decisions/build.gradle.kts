@@ -1,5 +1,3 @@
-import com.disspear574.swishy.convention.external.commonDependencies
-
 plugins {
     alias(libs.plugins.swishy.kmp.library)
     alias(libs.plugins.ksp)
@@ -10,6 +8,7 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+// KSP has no common task, so the Room compiler is added per target.
 dependencies {
     add("kspAndroid", libs.room.compiler)
     add("kspIosArm64", libs.room.compiler)
@@ -22,7 +21,7 @@ kotlin {
     }
 
     sourceSets {
-        commonDependencies {
+        commonMain.dependencies {
             api(projects.shared.core.media)
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)

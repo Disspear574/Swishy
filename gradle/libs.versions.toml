@@ -1,73 +1,54 @@
-#
+# No network libraries on purpose: the app never connects to the internet.
 
 [versions]
-
-# Toolchain
 java = "17"
 kotlin = "2.4.10"
 agp = "9.3.0"
 ksp = "2.3.11"
 
-# Android SDK
 compile-sdk = "37"
 target-sdk = "36"
+# MediaStore.createTrashRequest, the batch delete, needs Android 11.
 min-sdk = "30"
 
-# UI
 compose-multiplatform = "1.12.0"
-compose-material3 = "1.10.0-alpha05"
 androidx-activity-compose = "1.13.0"
+# Must match the lifecycle version Compose Multiplatform brings in.
 lifecycle = "2.9.6"
-androidx-lifecycle = "2.9.4"
-
-# Media
 media3 = "1.11.0"
 
-# Kotlin ecosystem
 kotlinx-coroutines = "1.11.0"
 kotlinx-datetime = "0.7.1"
 
-# Architecture
 decompose = "3.5.0"
 essenty = "2.5.0"
-mvikotlin = "4.4.0"
-koin = "4.2.2"
 
-# Data
 room = "2.8.4"
 sqlite = "2.6.2"
 
 detekt = "1.23.8"
 
 [libraries]
-
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 
-# Compose Multiplatform
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
 compose-ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-multiplatform" }
 compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
 compose-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
 
 lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidx-lifecycle" }
 
 androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
 androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
-
-# AndroidX
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.16.0" }
 
-# Kotlinx
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
@@ -79,17 +60,6 @@ essenty-state-keeper = { module = "com.arkivanov.essenty:state-keeper", version.
 essenty-instance-keeper = { module = "com.arkivanov.essenty:instance-keeper", version.ref = "essenty" }
 essenty-back-handler = { module = "com.arkivanov.essenty:back-handler", version.ref = "essenty" }
 
-mvikotlin-core = { module = "com.arkivanov.mvikotlin:mvikotlin", version.ref = "mvikotlin" }
-mvikotlin-main = { module = "com.arkivanov.mvikotlin:mvikotlin-main", version.ref = "mvikotlin" }
-mvikotlin-coroutines = { module = "com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines", version.ref = "mvikotlin" }
-
-# Koin
-koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
-koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
-koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
-koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
-
-# Room
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
@@ -97,15 +67,10 @@ sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sql
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 
 [bundles]
-
 compose-common = ["compose-runtime", "compose-ui", "compose-foundation", "compose-resources"]
-
-decompose-pure = ["decompose-core", "essenty-lifecycle", "essenty-state-keeper", "essenty-instance-keeper", "essenty-back-handler"]
 decompose-full = ["decompose-core", "decompose-compose", "decompose-compose-experimental", "essenty-lifecycle", "essenty-state-keeper", "essenty-instance-keeper", "essenty-back-handler"]
-mvikotlin = ["mvikotlin-core", "mvikotlin-main", "mvikotlin-coroutines"]
 
 [plugins]
-
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -116,6 +81,5 @@ room = { id = "androidx.room", version.ref = "room" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 
 swishy-android-application = { id = "com.disspear574.swishy.androidApplication" }
-swishy-android-library = { id = "com.disspear574.swishy.androidLibrary" }
 swishy-kmp-library = { id = "com.disspear574.swishy.kmplibrary" }
 swishy-compose-multiplatform = { id = "com.disspear574.swishy.compose-multiplatform" }

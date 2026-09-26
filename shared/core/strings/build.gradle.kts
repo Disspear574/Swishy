@@ -1,5 +1,3 @@
-import com.disspear574.swishy.convention.external.commonDependencies
-
 plugins {
     alias(libs.plugins.swishy.compose.multiplatform)
 }
@@ -10,7 +8,7 @@ kotlin {
     }
 
     sourceSets {
-        commonDependencies {
+        commonMain.dependencies {
             api(libs.compose.resources)
             implementation(libs.compose.runtime)
         }

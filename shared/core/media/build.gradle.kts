@@ -1,6 +1,3 @@
-import com.disspear574.swishy.convention.external.androidDependencies
-import com.disspear574.swishy.convention.external.commonDependencies
-
 plugins {
     alias(libs.plugins.swishy.compose.multiplatform)
 }
@@ -11,12 +8,13 @@ kotlin {
     }
 
     sourceSets {
-        commonDependencies {
+        commonMain.dependencies {
+            // Compose for ImageBitmap in signatures and for the platform views of PhotoCard and VideoCard.
             implementation(libs.bundles.compose.common)
             implementation(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.datetime)
         }
-        androidDependencies {
+        androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.media3.exoplayer)
             implementation(libs.androidx.media3.ui)

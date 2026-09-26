@@ -1,6 +1,3 @@
-import com.disspear574.swishy.convention.external.commonDependencies
-import com.disspear574.swishy.convention.external.setupIosStaticFramework
-
 plugins {
     alias(libs.plugins.swishy.compose.multiplatform)
 }
@@ -10,10 +7,16 @@ kotlin {
         namespace = "com.disspear574.swishy.app"
     }
 
-    setupIosStaticFramework(name = "SwishyKit") {}
+    // Not "Swishy": the app target has that name and `import Swishy` would import itself.
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
+            baseName = "SwishyKit"
+            isStatic = true
+        }
+    }
 
     sourceSets {
-        commonDependencies {
+        commonMain.dependencies {
             implementation(libs.bundles.compose.common)
             api(libs.bundles.decompose.full)
             api(projects.shared.core.media)
