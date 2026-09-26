@@ -20,6 +20,7 @@ FORBIDDEN_FILES = re.compile(
     r"|(^|/)(build|DerivedData|\.gradle|\.kotlin)/"
     r"|(^|/)(reports|results)/.*\.(html|txt|xml)$)"
 )
+NOREPLY = re.compile(r"^(?:\d+\+)?([^@]+)@users\.noreply\.github\.com$")
 PERSONAL_EMAIL = re.compile(r"\b[\w.+-]+@(gmail|yandex|ya|mail|icloud|me|outlook|hotmail)\.[a-z]{2,}\b", re.I)
 FORBIDDEN_TEXT = [
     ("machine path", re.compile(r"/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/|~/develop\b|C:\\\\Users\\\\")),
@@ -136,10 +137,14 @@ def history(revs, words):
     show = ["show", "--diff-merges=first-parent", "--no-color", "--no-ext-diff"]
     for sha in git("rev-list", *revs, check=True).split():
         prefix = f"commit {sha[:10]}: "
-        author, committer, message = git("show", "-s", "--format=%ae%x00%ce%x00%B", sha, check=True).split("\0", 2)
-        for role, email in (("author", author), ("committer", committer)):
+        fields = git("show", "-s", "--format=%an%x00%ae%x00%cn%x00%ce%x00%B", sha, check=True).split("\0", 4)
+        author_name, author, committer_name, committer, message = fields
+        for role, name, email in (("author", author_name, author), ("committer", committer_name, committer)):
             if PERSONAL_EMAIL.search(email):
                 problems.append(f"{prefix}{role} email is personal ({masked(email)}); use the noreply address")
+            login = NOREPLY.match(email)
+            if login and name != login.group(1):
+                problems.append(f"{prefix}{role} name is not the GitHub login; set user.name to it")
         for n, text in enumerate(message.split("\n"), 1):
             problems += [f"{prefix}message line {n}: {what}" for what in scan_line(text, words)]
         problems += forbidden_names(git(*show, "--format=", "--name-only", "--diff-filter=AR", sha, check=True), prefix)
