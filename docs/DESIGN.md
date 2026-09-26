@@ -18,8 +18,9 @@ blindness. With no color vision at all the icon and the word carry the direction
 
 ## Type
 
-Onest for text and IBM Plex Mono for numbers, both with Cyrillic. Weights are static instances
-cut from the variable fonts, subset to Latin and Cyrillic.
+Onest for text and Swishy Mono, a renamed subset of IBM Plex Mono, for numbers; both cover
+Cyrillic. Onest weights are static instances cut from the variable font. Both are subset to
+Latin and Cyrillic; licenses are in [licenses/fonts](../licenses/fonts).
 
 ## Swipe feedback
 

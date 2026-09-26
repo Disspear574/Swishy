@@ -13,10 +13,10 @@ import com.disspear574.swishy.designsystem.resources.onest_bold
 import com.disspear574.swishy.designsystem.resources.onest_medium
 import com.disspear574.swishy.designsystem.resources.onest_regular
 import com.disspear574.swishy.designsystem.resources.onest_semibold
-import com.disspear574.swishy.designsystem.resources.plex_mono_medium
+import com.disspear574.swishy.designsystem.resources.swishy_mono_medium
 import org.jetbrains.compose.resources.Font
 
-/** Type scale: Onest for text and IBM Plex Mono for numbers, both covering Cyrillic. */
+/** Type scale: Onest for text and Swishy Mono, a subset of IBM Plex Mono, for numbers. */
 @Immutable
 data class SwishyTypography(
     val display: TextStyle,
@@ -39,7 +39,7 @@ internal fun onestFamily(): FontFamily = FontFamily(
 
 @Composable
 internal fun monoFamily(): FontFamily = FontFamily(
-    Font(Res.font.plex_mono_medium, FontWeight.Medium),
+    Font(Res.font.swishy_mono_medium, FontWeight.Medium),
 )
 
 @Composable

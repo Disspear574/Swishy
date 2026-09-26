@@ -125,6 +125,12 @@ Work goes through issues and pull requests; the flow, branch names and commit fo
 ./scripts/check-conventions.sh
 ```
 
+## Third-party fonts
+
+Onest and IBM Plex Mono are used under the SIL Open Font License 1.1; the texts are in
+[licenses/fonts](licenses/fonts). The Plex subset is a Modified Version named Swishy Mono, as
+the license requires.
+
 ## License
 
 Copyright (c) 2026 Disspear574. All rights reserved. The source is available for reference
