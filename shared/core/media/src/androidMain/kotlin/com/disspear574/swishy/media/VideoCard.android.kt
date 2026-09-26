@@ -35,6 +35,7 @@ actual fun VideoCard(id: String, modifier: Modifier, playing: Boolean) {
     }
 }
 
+// loadThumbnail, unlike ImageDecoder, can read video frames.
 @Composable
 private fun VideoPosterCard(id: String, modifier: Modifier) {
     var poster by remember(id) { mutableStateOf<ImageBitmap?>(null) }
@@ -91,6 +92,7 @@ private fun VideoPlayerCard(id: String, modifier: Modifier) {
         }
     }
 
+    // A leaked ExoPlayer holds a hardware decoder; after a dozen swipes video stops opening.
     DisposableEffect(id) {
         onDispose { player.release() }
     }
@@ -102,6 +104,7 @@ private fun VideoPlayerCard(id: String, modifier: Modifier) {
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                 isClickable = false
                 isFocusable = false
+                // The view must not take the touch, or the swipe never reaches the card.
                 setOnTouchListener { _, _ -> false }
             }
         },

@@ -1,5 +1,6 @@
 package com.disspear574.swishy.media
 
+/** An album stored in the system library, unlike an [AlbumKind] collection computed by the app. */
 data class UserAlbum(
     val id: String,
     val title: String,

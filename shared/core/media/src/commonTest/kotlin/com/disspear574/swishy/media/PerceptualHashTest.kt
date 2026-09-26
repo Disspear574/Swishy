@@ -13,7 +13,7 @@ class PerceptualHashTest {
         IntArray(side * side) { index -> pixel(index % side, index / side).coerceIn(0, 255) }
 
     @Test
-    fun `одинаковые кадры дают одинаковые хеши`() {
+    fun `equal images give equal hashes`() {
         val a = image { x, y -> x * 3 + y * 5 }
         val b = image { x, y -> x * 3 + y * 5 }
 
@@ -25,7 +25,7 @@ class PerceptualHashTest {
     }
 
     @Test
-    fun `осветление кадра не меняет ни один из хешей`() {
+    fun `brightening changes neither hash`() {
         val original = image { x, y -> 40 + x * 2 + y }
         val brighter = image { x, y -> 40 + x * 2 + y + 30 }
 
@@ -37,7 +37,7 @@ class PerceptualHashTest {
     }
 
     @Test
-    fun `разные кадры расходятся далеко`() {
+    fun `different images are far apart`() {
         val ramp = image { x, _ -> x * 8 }
         val rings = image { x, y ->
             (128 + 120 * sin((x * x + y * y) / 40.0)).toInt()
@@ -48,12 +48,13 @@ class PerceptualHashTest {
 
         assertTrue(
             hammingDistance(first.dHash, second.dHash) > 8,
-            "dHash слишком близки: ${hammingDistance(first.dHash, second.dHash)}",
+            "dHash too close: ${hammingDistance(first.dHash, second.dHash)}",
         )
     }
 
     @Test
-    fun `второй хеш различает кадры, которые первый считает одинаковыми`() {
+    fun `the second hash separates images the first considers equal`() {
+        // Same horizontal ramp gives equal dHash; a low-frequency vertical wave moves pHash.
         val smooth = image { x, _ -> 10 + x * 4 }
         val waved = image { x, y -> (10 + x * 4 + 50 * sin(y / 5.0)).toInt() }
 
@@ -63,16 +64,16 @@ class PerceptualHashTest {
         assertEquals(
             0,
             hammingDistance(first.dHash, second.dHash),
-            "подготовка теста неверна: dHash обязан совпасть",
+            "test setup is wrong: dHash must match",
         )
         assertTrue(
             hammingDistance(first.pHash, second.pHash) > 8,
-            "pHash не различил кадры: ${hammingDistance(first.pHash, second.pHash)}",
+            "pHash did not separate the images: ${hammingDistance(first.pHash, second.pHash)}",
         )
     }
 
     @Test
-    fun `расстояние Хэмминга считает различающиеся биты`() {
+    fun `Hamming distance counts differing bits`() {
         assertEquals(0, hammingDistance(0b1011L, 0b1011L))
         assertEquals(2, hammingDistance(0b1011L, 0b0001L))
     }

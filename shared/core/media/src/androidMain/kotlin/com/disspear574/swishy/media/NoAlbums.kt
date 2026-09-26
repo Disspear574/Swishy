@@ -1,5 +1,6 @@
 package com.disspear574.swishy.media
 
+/** Android has folders, not albums: moving another app's file would need a system dialog. */
 internal object NoAlbums : AlbumLibrary {
 
     override val supportsAlbums: Boolean = false

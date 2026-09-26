@@ -1,11 +1,13 @@
 package com.disspear574.swishy.media
 
+/** Boundary between common code and the platform photo library. */
 interface MediaLibrary : AlbumLibrary {
 
     suspend fun permissionState(): PermissionState
 
     suspend fun requestPermission(): PermissionState
 
+    // Sizes may be zero here: on iOS each costs a resource lookup, so callers ask [sizeOf].
     suspend fun allAssets(): List<MediaAsset>
 
     suspend fun sizeOf(ids: List<String>): Map<String, Long>

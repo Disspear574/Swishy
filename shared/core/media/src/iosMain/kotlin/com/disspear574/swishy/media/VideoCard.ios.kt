@@ -31,6 +31,7 @@ actual fun VideoCard(id: String, modifier: Modifier, playing: Boolean) {
         return
     }
 
+    // The factory runs once per composition node; without key a new asset kept the old player on screen.
     key(id) {
         VideoCardContent(id = id, modifier = modifier)
     }
@@ -47,6 +48,7 @@ private fun VideoCardContent(id: String, modifier: Modifier) {
         val asset = PHAsset.fetchAssetsWithLocalIdentifiers(listOf(id), null)
             .firstObject as? PHAsset
         if (asset != null) {
+            // Without network access an iCloud video returns nothing and the card stays black.
             val options = PHVideoRequestOptions().apply { networkAccessAllowed = true }
             PHImageManager.defaultManager().requestPlayerItemForVideo(
                 asset = asset,
@@ -59,6 +61,7 @@ private fun VideoCardContent(id: String, modifier: Modifier) {
             }
         }
 
+        // AVPlayer does not loop by itself; a stopped video looks like a frozen photo.
         val observer = NSNotificationCenter.defaultCenter.addObserverForName(
             name = AVPlayerItemDidPlayToEndTimeNotification,
             `object` = null,
@@ -74,6 +77,7 @@ private fun VideoCardContent(id: String, modifier: Modifier) {
         }
     }
 
+    // A controller lays itself out; an AVPlayerLayer would need manual resizing without onResize.
     UIKitViewController(
         factory = {
             AVPlayerViewController().apply {
@@ -83,6 +87,7 @@ private fun VideoCardContent(id: String, modifier: Modifier) {
             }
         },
         modifier = modifier,
+        // interactionMode = null makes the view non-interactive, so it cannot swallow the swipe.
         properties = UIKitInteropProperties(interactionMode = null),
     )
 }

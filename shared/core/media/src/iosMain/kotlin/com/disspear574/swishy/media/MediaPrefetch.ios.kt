@@ -5,8 +5,10 @@ import platform.Photos.PHAsset
 import platform.Photos.PHCachingImageManager
 import platform.Photos.PHImageContentModeAspectFit
 
+// Uses the card manager, size and options, otherwise the cache never hits.
 @OptIn(ExperimentalForeignApi::class)
 actual fun prefetchMedia(ids: List<String>) {
+    // Incremental: stopping all caching on each swipe discarded half-downloaded iCloud files.
     val wanted = ids.toSet()
     val added = wanted - cached
     val dropped = cached - wanted

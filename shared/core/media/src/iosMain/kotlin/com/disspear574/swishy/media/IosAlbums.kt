@@ -13,6 +13,7 @@ import platform.Photos.PHFetchOptions
 import platform.Photos.PHPhotoLibrary
 import kotlin.coroutines.resume
 
+/** PhotoKit albums: regular ones only, since smart and synced albums are read-only. */
 internal object IosAlbums : AlbumLibrary {
 
     override val supportsAlbums: Boolean = true
@@ -121,6 +122,7 @@ internal object IosAlbums : AlbumLibrary {
                         error?.code == USER_CANCELLED -> ChangeOutcome.Cancelled
                         else -> ChangeOutcome.Failed(error?.localizedDescription ?: "unknown")
                     }
+                    // isActive guard: this bridge has crashed with "Already resumed".
                     if (continuation.isActive) continuation.resume(outcome)
                 },
             )

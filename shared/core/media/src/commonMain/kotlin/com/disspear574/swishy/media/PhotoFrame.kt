@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 
+// Drawn by Compose: a platform view ignores the card transform and stays put during a swipe.
 @Composable
 internal fun PhotoFrame(bitmap: ImageBitmap?, modifier: Modifier = Modifier) {
     Box(modifier) {

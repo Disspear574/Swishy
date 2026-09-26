@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 
+/** Media permissions: one before API 33, split from 33, and partial "selected photos" from 34. */
 internal object MediaPermissions {
 
     fun required(): Array<String> = when {

@@ -51,6 +51,7 @@ actual fun PhotoCard(
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 internal fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
+    // Keyed by id only, so the loaded frame survives the move from preview to top card.
     var image by remember(id) { mutableStateOf<UIImage?>(null) }
     var frame by remember(id) { mutableStateOf<ImageBitmap?>(null) }
 
@@ -65,9 +66,11 @@ internal fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
                 } else {
                     fullTargetSize()
                 },
+                // Fit, not fill: with fill PhotoKit returns an already cropped image.
                 contentMode = PHImageContentModeAspectFit,
                 options = imageOptions(),
             ) { result, _ ->
+                // The callback fires twice and requests run in parallel; a preview never replaces a full frame.
                 if (result != null && (!preview || image == null)) {
                     image = result
                 }
@@ -87,6 +90,7 @@ internal fun StillPhotoCard(id: String, modifier: Modifier, preview: Boolean) {
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 private fun LivePhotoCard(id: String, modifier: Modifier) {
+    // One view per asset; otherwise the factory runs once and keeps the previous live photo.
     key(id) {
         var livePhoto by remember(id) { mutableStateOf<PHLivePhoto?>(null) }
 
@@ -124,18 +128,22 @@ private fun LivePhotoCard(id: String, modifier: Modifier) {
                     livePhotoView.startPlaybackWithStyle(PHLivePhotoViewPlaybackStyleFull)
                 }
             },
+            // An interactive native view swallows the touch and kills the swipe.
             properties = UIKitInteropProperties(interactionMode = null),
         )
     }
 }
 
 internal fun imageOptions(): PHImageRequestOptions = PHImageRequestOptions().apply {
+    // Opportunistic calls back twice, blurred then sharp, so an iCloud asset never shows an empty card.
     deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic
+    // Without resizeMode PhotoKit returns larger images, up to the full camera original.
     resizeMode = PHImageRequestOptionsResizeModeFast
     networkAccessAllowed = true
     synchronous = false
 }
 
+// Shared with prefetching: the cache hits only when the request parameters match.
 @OptIn(ExperimentalForeignApi::class)
 internal fun fullTargetSize(): CValue<CGSize> = CGSizeMake(TARGET_WIDTH, TARGET_HEIGHT)
 

@@ -5,10 +5,11 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sqrt
 
+/** Two 64-bit perceptual hashes; requiring both to match keeps dark flat frames from clustering. */
 data class ImageHash(val dHash: Long, val pHash: Long)
 
 fun perceptualHash(gray: IntArray, side: Int): ImageHash {
-    require(gray.size == side * side) { "ожидалась миниатюра $side×$side" }
+    require(gray.size == side * side) { "expected a ${side}x$side thumbnail" }
     return ImageHash(dHash = dHash(gray, side), pHash = pHash(gray, side))
 }
 
@@ -37,6 +38,7 @@ private fun pHash(gray: IntArray, side: Int): Long {
         }
     }
 
+    // Exact zeros come out as +/-1e-11 with a random sign and would flip bits on flat frames.
     val strongest = coefficients.drop(1).maxOf { abs(it) }
     val noiseFloor = strongest * NOISE_FRACTION
     val cleaned = DoubleArray(coefficients.size) { index ->
@@ -50,6 +52,7 @@ private fun pHash(gray: IntArray, side: Int): Long {
 
     var hash = 0L
     cleaned.forEachIndexed { index, value ->
+        // Bit 0 is the DC term (mean brightness) and stays zero, so brightening keeps the hash.
         if (index != 0 && value > median) hash = hash or (1L shl index)
     }
     return hash

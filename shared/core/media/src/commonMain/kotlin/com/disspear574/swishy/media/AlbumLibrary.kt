@@ -1,5 +1,6 @@
 package com.disspear574.swishy.media
 
+/** User albums of the library; Android has folders instead, so callers check [supportsAlbums]. */
 interface AlbumLibrary {
 
     val supportsAlbums: Boolean

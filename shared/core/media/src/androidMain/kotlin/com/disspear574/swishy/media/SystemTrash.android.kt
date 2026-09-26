@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.provider.MediaStore
 
+// Android has no common trash screen, so the vendor gallery is opened instead.
 actual fun openSystemTrash() {
     val context = MediaContext.appContext ?: return
     val intent = Intent(Intent.ACTION_VIEW).apply {
@@ -13,5 +14,6 @@ actual fun openSystemTrash() {
     try {
         context.startActivity(intent)
     } catch (@Suppress("SwallowedException") ignored: ActivityNotFoundException) {
+        // No gallery app, e.g. on a bare AOSP emulator.
     }
 }

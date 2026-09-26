@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 
+/** MediaStore library read through one Files query rather than separate Images and Video queries. */
 class AndroidMediaLibrary(
     private val context: Context,
     private val requestHost: SystemRequestHost,
@@ -62,6 +63,7 @@ class AndroidMediaLibrary(
             columns,
             selection,
             selectionArgs,
+            // Sorted in Kotlin: the effective date is known only after DATE_MODIFIED fills zero DATE_TAKEN.
             null,
         )?.use { cursor ->
             val idIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
@@ -80,6 +82,7 @@ class AndroidMediaLibrary(
                 val isVideo =
                     cursor.getInt(typeIndex) == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
 
+                // DATE_TAKEN is zero without EXIF; DATE_MODIFIED is in seconds, DATE_TAKEN in millis.
                 val takenAt = cursor.getLong(takenIndex).takeIf { it > 0 }
                     ?: (cursor.getLong(modifiedIndex) * MILLIS_IN_SECOND)
 
@@ -89,6 +92,7 @@ class AndroidMediaLibrary(
                     takenAtMillis = takenAt,
                     sizeBytes = cursor.getLong(sizeIndex),
                     durationMillis = cursor.getLong(durationIndex).takeIf { isVideo && it > 0 },
+                    // MediaStore has no screenshot flag; vendors spell the folder in different case.
                     isScreenshot = cursor.getString(pathIndex)
                         ?.contains(SCREENSHOTS_FOLDER, ignoreCase = true) == true,
                     isFavorite = cursor.getInt(favoriteIndex) != 0,
@@ -105,6 +109,7 @@ class AndroidMediaLibrary(
         val known = readAll().filter { it.id in ids }
         val freedBytes = known.sumOf { it.sizeBytes }
 
+        // createTrashRequest rejects Files URIs with "All requested items must be Media items".
         val uris = known.mapNotNull { asset ->
             asset.id.toLongOrNull()?.let { numeric ->
                 ContentUris.withAppendedId(asset.kind.collectionUri(), numeric)
@@ -112,6 +117,7 @@ class AndroidMediaLibrary(
         }
         if (uris.isEmpty()) return DeleteResult.Failed(reason = "no media items")
 
+        // The request crosses binder: slow on the main thread, and a throw would crash the deck.
         val request = withContext(Dispatchers.IO) {
             runCatching { MediaStore.createTrashRequest(context.contentResolver, uris, true) }
         }.getOrElse { error ->
@@ -134,7 +140,6 @@ class AndroidMediaLibrary(
 
     private companion object {
         const val MILLIS_IN_SECOND = 1_000L
-
         const val SCREENSHOTS_FOLDER = "Screenshots"
     }
 }

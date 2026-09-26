@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+/** The library read once and shared by all screens; file sizes are filled in later, in batches. */
 class MediaIndex(
     private val library: MediaLibrary,
     private val scope: CoroutineScope,

@@ -50,6 +50,7 @@ private const val RED_SHIFT = 16
 private const val GREEN_SHIFT = 8
 private const val BYTE_MASK = 0xFF
 
+// Rec. 601 luma weights.
 private const val RED_WEIGHT = 299
 private const val GREEN_WEIGHT = 587
 private const val BLUE_WEIGHT = 114

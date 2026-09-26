@@ -30,6 +30,7 @@ class IosMediaLibrary : MediaLibrary, AlbumLibrary by IosAlbums {
     override suspend fun requestPermission(): PermissionState =
         suspendCancellableCoroutine { continuation ->
             PHPhotoLibrary.requestAuthorizationForAccessLevel(PHAccessLevelReadWrite) { status ->
+                // The system may answer twice; a second resume would crash.
                 if (continuation.isActive) {
                     continuation.resume(status.toState())
                 }
@@ -80,6 +81,7 @@ class IosMediaLibrary : MediaLibrary, AlbumLibrary by IosAlbums {
             id = asset.localIdentifier,
             kind = if (isVideo) MediaKind.VIDEO else MediaKind.PHOTO,
             takenAtMillis = ((asset.creationDate?.timeIntervalSince1970 ?: 0.0) * 1_000).toLong(),
+            // Zero on purpose: a size costs a resource lookup per asset, so it is fetched separately.
             sizeBytes = 0,
             durationMillis = (asset.duration * 1_000).toLong().takeIf { isVideo },
             isLive = asset.hasSubtype(PHAssetMediaSubtypePhotoLive),

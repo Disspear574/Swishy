@@ -26,14 +26,14 @@ class AlbumsTest {
     )
 
     @Test
-    fun `пустые подборки не показываются`() {
+    fun `empty collections are not shown`() {
         val summaries = listOf(asset("a")).albumSummaries()
 
-        assertTrue(summaries.isEmpty(), "ожидался пустой список, получено: $summaries")
+        assertTrue(summaries.isEmpty(), "expected an empty list, got: $summaries")
     }
 
     @Test
-    fun `кадр попадает во все подборки, которым отвечает`() {
+    fun `an asset falls into every collection it matches`() {
         val assets = listOf(
             asset("screen", screenshot = true, favorite = true, size = 10),
             asset("clip", kind = MediaKind.VIDEO, size = 1_000),
@@ -46,12 +46,13 @@ class AlbumsTest {
         assertEquals(1, byAlbum[AlbumKind.FAVORITES]?.count)
         assertEquals(1, byAlbum[AlbumKind.VIDEOS]?.count)
         assertEquals(1, byAlbum[AlbumKind.LIVE]?.count)
+        // A favorite screenshot counts in both: collections overlap rather than partition.
         assertEquals(10, byAlbum[AlbumKind.FAVORITES]?.sizeBytes)
         assertEquals(1_000, byAlbum[AlbumKind.VIDEOS]?.sizeBytes)
     }
 
     @Test
-    fun `живое фото остаётся фотографией, а не видео`() {
+    fun `a live photo stays a photo, not a video`() {
         val summaries = listOf(asset("live", live = true)).albumSummaries()
 
         assertEquals(listOf(AlbumKind.LIVE), summaries.map { it.album })

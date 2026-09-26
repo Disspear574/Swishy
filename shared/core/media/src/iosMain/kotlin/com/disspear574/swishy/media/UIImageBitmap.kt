@@ -28,6 +28,7 @@ import platform.UIKit.UIImageOrientation
 @Suppress("ReturnCount")
 @OptIn(ExperimentalForeignApi::class)
 internal fun UIImage.toImageBitmap(): ImageBitmap? {
+    // CGImage is nil for images not backed by a bitmap, such as video posters, hence the redraw.
     val cgImage = upright()?.CGImage ?: redrawn()?.CGImage ?: return null
     val width = CGImageGetWidth(cgImage).toInt()
     val height = CGImageGetHeight(cgImage).toInt()
@@ -62,6 +63,7 @@ internal fun UIImage.toImageBitmap(): ImageBitmap? {
     ).toComposeImageBitmap()
 }
 
+// Camera shots keep rotation in a separate field that drawing the CGImage ignores.
 @OptIn(ExperimentalForeignApi::class)
 private fun UIImage.upright(): UIImage? {
     if (imageOrientation == UIImageOrientation.UIImageOrientationUp) return this

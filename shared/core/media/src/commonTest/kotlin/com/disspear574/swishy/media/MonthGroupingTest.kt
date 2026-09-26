@@ -14,13 +14,13 @@ class MonthGroupingTest {
         durationMillis = null,
     )
 
-    /** 2026-09-20T12:00:00Z */
     private val september = 1_789_905_600_000L
 
+    // 31 Aug 2026 23:00 UTC, already September in Moscow.
     private val augustLateUtc = 1_788_217_200_000L
 
     @Test
-    fun `собирает ассеты одного месяца в одну сводку`() {
+    fun `assets of one month form one summary`() {
         val months = listOf(
             photo("a", september, sizeBytes = 2_000),
             photo("b", september + 1_000, sizeBytes = 3_000),
@@ -33,7 +33,7 @@ class MonthGroupingTest {
     }
 
     @Test
-    fun `свежие месяцы идут первыми`() {
+    fun `recent months come first`() {
         val months = listOf(photo("old", augustLateUtc), photo("new", september))
             .groupIntoMonths(TimeZone.UTC)
 
@@ -41,7 +41,7 @@ class MonthGroupingTest {
     }
 
     @Test
-    fun `месяц определяется местной датой, а не UTC`() {
+    fun `month is taken from the local date, not UTC`() {
         val moscow = TimeZone.of("Europe/Moscow")
 
         val months = listOf(photo("edge", augustLateUtc)).groupIntoMonths(moscow)
@@ -50,12 +50,12 @@ class MonthGroupingTest {
     }
 
     @Test
-    fun `пустой список даёт пустой результат`() {
+    fun `empty list gives empty result`() {
         assertEquals(emptyList(), emptyList<MediaAsset>().groupIntoMonths(TimeZone.UTC))
     }
 
     @Test
-    fun `ключ месяца одного ассета совпадает с ключом его сводки`() {
+    fun `month key of an asset matches its summary`() {
         val asset = photo("a", september)
 
         assertEquals(

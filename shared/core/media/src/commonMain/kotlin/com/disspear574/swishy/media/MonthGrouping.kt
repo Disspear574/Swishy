@@ -5,6 +5,7 @@ import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
+// Months follow the local calendar, not UTC.
 fun MediaAsset.monthKeyIn(timeZone: TimeZone): MonthKey {
     val local = Instant.fromEpochMilliseconds(takenAtMillis).toLocalDateTime(timeZone)
     return MonthKey(year = local.year, month = local.month.number)

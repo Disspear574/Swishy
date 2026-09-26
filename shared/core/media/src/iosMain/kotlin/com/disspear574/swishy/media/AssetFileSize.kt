@@ -5,6 +5,7 @@ import platform.Foundation.valueForKey
 import platform.Photos.PHAsset
 import platform.Photos.PHAssetResource
 
+// A costly per-asset resource lookup: call it only where few assets are involved.
 internal fun PHAsset.fileSizeBytes(): Long {
     val resource = PHAssetResource.assetResourcesForAsset(this).firstOrNull() as? PHAssetResource
         ?: return 0

@@ -2,9 +2,9 @@ package com.disspear574.swishy.media
 
 data class HashedAsset(val id: String, val hash: ImageHash)
 
+/** IDENTICAL means every hash in the group is equal; SIMILAR covers bursts and crops. */
 enum class DuplicateKind {
     IDENTICAL,
-
     SIMILAR,
 }
 
@@ -21,6 +21,7 @@ fun groupDuplicates(assets: List<HashedAsset>): List<DuplicateGroup> {
         if (first != index) union.join(first, index)
     }
 
+    // Hashes within 7 bits share a whole 8-bit band (pigeonhole), so banding misses no close pair.
     val byBand = mutableMapOf<Long, MutableList<Int>>()
     assets.forEachIndexed { index, asset ->
         for (band in 0 until BANDS) {
@@ -29,6 +30,7 @@ fun groupDuplicates(assets: List<HashedAsset>): List<DuplicateGroup> {
         }
     }
     byBand.values
+        // Overflowing bands hold flat frames; their exact matches are already joined above.
         .filter { bucket -> bucket.size in 2..BAND_OVERFLOW }
         .forEach { bucket -> joinSimilar(assets, bucket, union) }
 
@@ -60,6 +62,7 @@ private fun isSimilar(first: ImageHash, second: ImageHash): Boolean =
 private fun bandKey(hash: Long, band: Int): Long {
     val shift = band * BAND_BITS
     val slice = (hash ushr shift) and BAND_MASK
+    // The band index is part of the key: equal bits in different bands are not a match.
     return slice * BANDS + band
 }
 

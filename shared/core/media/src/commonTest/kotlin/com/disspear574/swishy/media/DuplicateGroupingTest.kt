@@ -18,8 +18,9 @@ class DuplicateGroupingTest {
     }
 
     @Test
-    fun `кадры с одинаковыми хешами собираются в группу одинаковых`() {
+    fun `assets with equal hashes form an identical group`() {
         val groups = groupDuplicates(
+            // Truly far: small numbers such as 1 and 99 differ in only three bits.
             listOf(asset("a", 1L, 2L), asset("b", 1L, 2L), asset("c", farD, farP)),
         )
 
@@ -29,23 +30,24 @@ class DuplicateGroupingTest {
     }
 
     @Test
-    fun `одинокий кадр не образует группы`() {
+    fun `a single asset forms no group`() {
         val groups = groupDuplicates(listOf(asset("a", 1L, 2L)))
 
-        assertTrue(groups.isEmpty(), "получено: $groups")
+        assertTrue(groups.isEmpty(), "got: $groups")
     }
 
     @Test
-    fun `оба порога обязательны`() {
+    fun `both thresholds must pass`() {
+        // Equal dHash with a far pHash means different frames.
         val groups = groupDuplicates(
             listOf(asset("a", 0L, 0L), asset("b", 0L, flip(0L, 20))),
         )
 
-        assertTrue(groups.isEmpty(), "получено: $groups")
+        assertTrue(groups.isEmpty(), "got: $groups")
     }
 
     @Test
-    fun `похожесть переносится по цепочке`() {
+    fun `similarity carries along a chain`() {
         val a = asset("a", 0L, 0L)
         val b = asset("b", flip(0L, 5), flip(0L, 5))
         val c = asset("c", flip(0L, 10), flip(0L, 10))
@@ -58,7 +60,7 @@ class DuplicateGroupingTest {
     }
 
     @Test
-    fun `кластер из одинаковых и похожих помечается как похожий`() {
+    fun `a cluster of identical and similar assets is marked similar`() {
         val groups = groupDuplicates(
             listOf(asset("a", 0L, 0L), asset("b", 0L, 0L), asset("c", flip(0L, 6), flip(0L, 6))),
         )
@@ -68,7 +70,8 @@ class DuplicateGroupingTest {
     }
 
     @Test
-    fun `одинаковые кадры находятся даже в переполненной полосе`() {
+    fun `identical assets are found even in an overflowing band`() {
+        // Overflowing bands are skipped, but exact matches come from the hash map.
         val flat = List(BAND_OVERFLOW + 50) { index -> asset("flat$index", 0L, 0L) }
 
         val groups = groupDuplicates(flat)

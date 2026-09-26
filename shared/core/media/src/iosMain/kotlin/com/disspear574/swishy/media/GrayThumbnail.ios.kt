@@ -20,6 +20,7 @@ import platform.UIKit.UIGraphicsPushContext
 import platform.UIKit.UIImage
 import kotlin.coroutines.resume
 
+// No network: allowing it would silently download the whole library from iCloud.
 @OptIn(ExperimentalForeignApi::class)
 actual suspend fun grayThumbnail(id: String, side: Int): IntArray? {
     val asset = fetchAsset(id) ?: return null
@@ -35,9 +36,11 @@ actual suspend fun grayThumbnail(id: String, side: Int): IntArray? {
         val requestId = photoManager.requestImageForAsset(
             asset = asset,
             targetSize = CGSizeMake(side.toDouble(), side.toDouble()),
+            // Fill, not fit: letterbox bars of varying height would count as differences.
             contentMode = PHImageContentModeAspectFill,
             options = options,
         ) { result, _ ->
+            // A second resume would crash; the guard is cheap even if fast mode calls back once.
             if (!answered) {
                 answered = true
                 continuation.resume(result)
@@ -49,6 +52,7 @@ actual suspend fun grayThumbnail(id: String, side: Int): IntArray? {
     return image.toGray(side)
 }
 
+// Drawn through UIKit: CGImage is nil for images not backed by a bitmap, as PhotoKit thumbnails are.
 @OptIn(ExperimentalForeignApi::class)
 private fun UIImage.toGray(side: Int): IntArray? {
     val pixels = ByteArray(side * side)

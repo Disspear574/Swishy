@@ -1,5 +1,6 @@
 package com.disspear574.swishy.media
 
+/** Collections computed from asset traits rather than platform albums, which Android lacks. */
 enum class AlbumKind {
     SCREENSHOTS,
     VIDEOS,

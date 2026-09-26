@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.io.IOException
 
+// live and playingLive are ignored: Android has no public API to play a motion photo.
 @Composable
 actual fun PhotoCard(
     id: String,
@@ -26,10 +27,12 @@ actual fun PhotoCard(
     playingLive: Boolean,
     preview: Boolean,
 ) {
+    // Keyed by id only, so the loaded frame survives the move from preview to top card.
     var bitmap by remember(id) { mutableStateOf<ImageBitmap?>(null) }
 
     LaunchedEffect(id, preview) {
         val decoded = decode(id = id, preview = preview)
+        // Requests run in parallel: a late preview must not overwrite the full frame.
         if (decoded != null && (!preview || bitmap == null)) {
             bitmap = decoded
         }
@@ -38,6 +41,7 @@ actual fun PhotoCard(
     PhotoFrame(bitmap = bitmap, modifier = modifier)
 }
 
+// ImageDecoder, not loadThumbnail: it keeps the Ultra HDR gainmap from Android 14.
 @Suppress("SwallowedException")
 private suspend fun decode(id: String, preview: Boolean): ImageBitmap? {
     val context = MediaContext.appContext ?: return null
@@ -58,6 +62,7 @@ private suspend fun decode(id: String, preview: Boolean): ImageBitmap? {
                         preview = preview,
                     ),
                 )
+                // Compose may read pixels back, which a hardware bitmap does not allow.
                 decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             }.asImageBitmap()
         } catch (notFound: FileNotFoundException) {
