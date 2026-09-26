@@ -47,6 +47,17 @@ class DuplicateGroupingTest {
     }
 
     @Test
+    fun `hashes at the dHash threshold are grouped when every byte differs`() {
+        // One changed bit in each byte: distance 8, and no 8-bit slice of the two hashes is equal.
+        val spread = 0x0101_0101_0101_0101L
+
+        val groups = groupDuplicates(listOf(asset("a", 0L, 0L), asset("b", spread, 0L)))
+
+        assertEquals(1, groups.size)
+        assertEquals(listOf("a", "b"), groups.single().ids)
+    }
+
+    @Test
     fun `similarity carries along a chain`() {
         val a = asset("a", 0L, 0L)
         val b = asset("b", flip(0L, 5), flip(0L, 5))
