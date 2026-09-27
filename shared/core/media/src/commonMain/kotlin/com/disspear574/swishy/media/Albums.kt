@@ -11,6 +11,7 @@ enum class AlbumKind {
     SCREENSHOTS,
     VIDEOS,
     LONG_VIDEOS,
+    SHORT_VIDEOS,
     LIVE,
     FAVORITES,
     ON_THIS_DAY,
@@ -18,12 +19,16 @@ enum class AlbumKind {
 
 private const val LONG_VIDEO_MILLIS = 60_000L
 
+// Motion photos exported from Google Photos arrive as clips of a second or two.
+private const val SHORT_VIDEO_MILLIS = 3_000L
+
 fun todayIn(timeZone: TimeZone): LocalDate = Clock.System.now().toLocalDateTime(timeZone).date
 
 fun MediaAsset.isIn(album: AlbumKind, today: LocalDate, timeZone: TimeZone): Boolean = when (album) {
     AlbumKind.SCREENSHOTS -> isScreenshot
     AlbumKind.VIDEOS -> kind == MediaKind.VIDEO
     AlbumKind.LONG_VIDEOS -> kind == MediaKind.VIDEO && (durationMillis ?: 0) >= LONG_VIDEO_MILLIS
+    AlbumKind.SHORT_VIDEOS -> kind == MediaKind.VIDEO && (durationMillis ?: 0) in 1..SHORT_VIDEO_MILLIS
     AlbumKind.LIVE -> isLive
     AlbumKind.FAVORITES -> isFavorite
     AlbumKind.ON_THIS_DAY -> {

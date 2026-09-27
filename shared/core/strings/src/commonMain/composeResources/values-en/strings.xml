@@ -14,6 +14,7 @@
     <string name="album_live">Live Photos</string>
     <string name="album_favorites">Favourites</string>
     <string name="album_long_videos">Long videos</string>
+    <string name="album_short_videos">Short videos</string>
     <string name="album_on_this_day">On this day</string>
     <string name="albums_section">Collections</string>
     <string name="months_section">Months</string>

@@ -86,4 +86,15 @@ class AlbumsTest {
         assertTrue(!short.isIn(AlbumKind.LONG_VIDEOS, today, utc))
         assertTrue(!photo.isIn(AlbumKind.LONG_VIDEOS, today, utc))
     }
+
+    @Test
+    fun `short videos last three seconds or less`() {
+        val clip = asset("clip", kind = MediaKind.VIDEO, duration = 3_000)
+        val longer = asset("longer", kind = MediaKind.VIDEO, duration = 3_001)
+        val photo = asset("photo", duration = 1_000)
+
+        assertTrue(clip.isIn(AlbumKind.SHORT_VIDEOS, today, utc))
+        assertTrue(!longer.isIn(AlbumKind.SHORT_VIDEOS, today, utc))
+        assertTrue(!photo.isIn(AlbumKind.SHORT_VIDEOS, today, utc))
+    }
 }
