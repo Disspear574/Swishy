@@ -50,4 +50,13 @@ class SwipeResolutionTest {
         assertEquals(SwipeVerdict.Move, capped.verdict)
         assertEquals(1f, capped.magnitude)
     }
+
+    @Test
+    fun `a direction is armed only once its threshold is reached`() {
+        assertEquals(null, armedVerdict(swipeHint(horizontal = 0.9f, up = 0f, moveEnabled = true)))
+        assertEquals(SwipeVerdict.Keep, armedVerdict(swipeHint(horizontal = 1f, up = 0f, moveEnabled = true)))
+        assertEquals(SwipeVerdict.Trash, armedVerdict(swipeHint(horizontal = -1.4f, up = 0f, moveEnabled = true)))
+        assertEquals(SwipeVerdict.Move, armedVerdict(swipeHint(horizontal = 0f, up = 1.2f, moveEnabled = true)))
+        assertEquals(null, armedVerdict(SwipeHint.None))
+    }
 }

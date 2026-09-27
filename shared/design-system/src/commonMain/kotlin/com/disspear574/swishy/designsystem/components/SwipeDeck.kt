@@ -33,7 +33,9 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.disspear574.swishy.designsystem.theme.SwishyTheme
 import com.disspear574.swishy.designsystem.theme.isReduceMotionEnabled
@@ -80,6 +82,13 @@ fun <T : Any> SwipeDeck(
     )
 
     LaunchedEffect(hint) { onHintChange(hint) }
+
+    // One tap when a direction arms, the moment the ring fills, so the release is felt as well as seen.
+    val haptics = LocalHapticFeedback.current
+    val armed = armedVerdict(hint)
+    LaunchedEffect(armed) {
+        if (armed != null) haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+    }
 
     val visible = items.take(BEHIND_COUNT + 1)
 
