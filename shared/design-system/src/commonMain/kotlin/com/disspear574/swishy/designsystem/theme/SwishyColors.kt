@@ -17,6 +17,8 @@ data class SwishyColors(
     val trash: Color,
     val move: Color,
     val onAccent: Color,
+    val mediaScrim: Color,
+    val onMedia: Color,
     val isDark: Boolean,
 )
 
@@ -34,6 +36,9 @@ internal val LightColors = SwishyColors(
     // Amber differs from red mainly in lightness, which every form of color blindness still sees.
     move = Color(0xFFB86E00),
     onAccent = Color(0xFFFFFFFF),
+    // Over a photo the theme does not decide the background, so these stay the same in both.
+    mediaScrim = Color(0x80000000),
+    onMedia = Color(0xFFFFFFFF),
     isDark = false,
 )
 
@@ -49,5 +54,7 @@ internal val DarkColors = SwishyColors(
     trash = Color(0xFFF2604C),
     move = Color(0xFFF0A52C),
     onAccent = Color(0xFF0C0E13),
+    mediaScrim = Color(0x80000000),
+    onMedia = Color(0xFFFFFFFF),
     isDark = true,
 )

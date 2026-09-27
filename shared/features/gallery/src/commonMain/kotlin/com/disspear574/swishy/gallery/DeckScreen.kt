@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.disspear574.swishy.decisions.Decision
 import com.disspear574.swishy.decisions.DecisionStore
@@ -36,6 +38,8 @@ import com.disspear574.swishy.designsystem.components.AlbumChoice
 import com.disspear574.swishy.designsystem.components.AlbumPickerSheet
 import com.disspear574.swishy.designsystem.components.BackButton
 import com.disspear574.swishy.designsystem.components.HintBar
+import com.disspear574.swishy.designsystem.components.LoadingRing
+import com.disspear574.swishy.designsystem.components.PlayBadge
 import com.disspear574.swishy.designsystem.components.ProgressTrack
 import com.disspear574.swishy.designsystem.components.SwipeDeck
 import com.disspear574.swishy.designsystem.components.SwipeHint
@@ -75,6 +79,9 @@ import com.disspear574.swishy.strings.deck_progress
 import com.disspear574.swishy.strings.deck_trash
 import com.disspear574.swishy.strings.deck_undo
 import com.disspear574.swishy.strings.mix_title
+import com.disspear574.swishy.strings.video_loading
+import com.disspear574.swishy.strings.video_pause
+import com.disspear574.swishy.strings.video_play
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -101,6 +108,8 @@ internal fun DeckScreen(
     var reloadToken by remember(source) { mutableIntStateOf(0) }
     var outcome by remember(source) { mutableStateOf<DeleteResult?>(null) }
     var heldId by remember(source) { mutableStateOf<String?>(null) }
+    // A tap keeps a video playing after the finger lifts, so an iCloud download can finish.
+    var tappedId by remember(source) { mutableStateOf<String?>(null) }
     var albumPick by remember(source) { mutableStateOf<CompletableDeferred<AlbumChoice?>?>(null) }
     var albums by remember { mutableStateOf<List<UserAlbum>>(emptyList()) }
     // Kept only for undo within this visit; the database does not store the album.
@@ -249,6 +258,11 @@ internal fun DeckScreen(
                                 Modifier.holdToPlay(
                                     key = item.id,
                                     onChange = { held -> heldId = item.id.takeIf { held } },
+                                    onTap = if (item.kind == MediaKind.VIDEO) {
+                                        { tappedId = item.id.takeIf { tappedId != item.id } }
+                                    } else {
+                                        null
+                                    },
                                 )
                             } else {
                                 Modifier
@@ -256,11 +270,27 @@ internal fun DeckScreen(
                         ),
                 ) {
                     if (item.kind == MediaKind.VIDEO) {
+                        val playing = depth == 0 && (heldId == item.id || tappedId == item.id)
+                        val playLabel = stringResource(if (playing) Res.string.video_pause else Res.string.video_play)
+                        val loadingLabel = stringResource(Res.string.video_loading)
                         VideoCard(
                             id = item.id,
-                            modifier = Modifier.fillMaxSize(),
-                            playing = depth == 0 && heldId == item.id,
+                            modifier = Modifier.fillMaxSize().semantics {
+                                if (depth == 0) {
+                                    onClick(label = playLabel) {
+                                        tappedId = item.id.takeIf { tappedId != item.id }
+                                        true
+                                    }
+                                }
+                            },
+                            playing = playing,
+                            loading = { progress ->
+                                LoadingRing(progress = progress, contentDescription = loadingLabel)
+                            },
                         )
+                        if (depth == 0 && !playing) {
+                            PlayBadge(Modifier.align(Alignment.Center))
+                        }
                     } else {
                         PhotoCard(
                             id = item.id,
@@ -416,16 +446,23 @@ private fun DeckFinished(
     }
 }
 
-private fun Modifier.holdToPlay(key: Any, onChange: (Boolean) -> Unit): Modifier =
+private fun Modifier.holdToPlay(key: Any, onChange: (Boolean) -> Unit, onTap: (() -> Unit)?): Modifier =
     pointerInput(key) {
         awaitEachGesture {
             // Observes without consuming, so the swipe stays the primary gesture.
             awaitFirstDown(requireUnconsumed = false)
-            val released = withTimeoutOrNull(LIVE_HOLD_MILLIS) { waitForUpOrCancellation() }
-            if (released == null) {
-                onChange(true)
-                waitForUpOrCancellation()
-                onChange(false)
+            var cancelled = false
+            val released = withTimeoutOrNull(LIVE_HOLD_MILLIS) {
+                waitForUpOrCancellation().also { cancelled = it == null }
+            }
+            when {
+                released != null -> onTap?.invoke()
+                cancelled -> Unit
+                else -> {
+                    onChange(true)
+                    waitForUpOrCancellation()
+                    onChange(false)
+                }
             }
         }
     }

@@ -130,4 +130,7 @@
     <string name="a11y_restore">Put the frame back in the deck</string>
     <string name="a11y_open_trash">Open the trash</string>
     <string name="decimal_separator">.</string>
+    <string name="video_play">Play video</string>
+    <string name="video_pause">Pause video</string>
+    <string name="video_loading">Loading video</string>
 </resources>
