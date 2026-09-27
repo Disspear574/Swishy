@@ -144,4 +144,7 @@
     <string name="a11y_restore">Вернуть кадр в колоду</string>
     <string name="a11y_open_trash">Открыть корзину</string>
     <string name="decimal_separator">,</string>
+    <string name="video_play">Воспроизвести видео</string>
+    <string name="video_pause">Поставить видео на паузу</string>
+    <string name="video_loading">Видео загружается</string>
 </resources>
