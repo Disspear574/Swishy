@@ -1,6 +1,8 @@
 package com.disspear574.swishy.media
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 import platform.Foundation.NSMutableArray
 import platform.Foundation.NSPredicate
@@ -37,23 +39,21 @@ class IosMediaLibrary : MediaLibrary, AlbumLibrary by IosAlbums {
             }
         }
 
-    override suspend fun allAssets(): List<MediaAsset> = readAll()
+    // PhotoKit reads block for as long as the library is large; the main thread must never wait on them.
+    override suspend fun allAssets(): List<MediaAsset> = withContext(Dispatchers.Default) { readAll() }
 
-    override suspend fun sizeOf(ids: List<String>): Map<String, Long> {
-        val wanted = ids.toHashSet()
-        return fetchAssets()
-            .filter { it.localIdentifier in wanted }
-            .associate { it.localIdentifier to it.fileSizeBytes() }
+    override suspend fun sizeOf(ids: List<String>): Map<String, Long> = withContext(Dispatchers.Default) {
+        fetchAssetsById(ids).associate { it.localIdentifier to it.fileSizeBytes() }
     }
 
-    override suspend fun assets(month: MonthKey): List<MediaAsset> {
+    override suspend fun assets(month: MonthKey): List<MediaAsset> = withContext(Dispatchers.Default) {
         val zone = TimeZone.currentSystemDefault()
-        return readAll().filter { asset -> asset.monthKeyIn(zone) == month }
+        readAll().filter { asset -> asset.monthKeyIn(zone) == month }
     }
 
-    override suspend fun assets(ids: List<String>): List<MediaAsset> {
+    override suspend fun assets(ids: List<String>): List<MediaAsset> = withContext(Dispatchers.Default) {
         val byId = readAll().associateBy { it.id }
-        return ids.mapNotNull(byId::get)
+        ids.mapNotNull(byId::get)
     }
 
     private fun fetchAssets(): List<PHAsset> {
@@ -93,9 +93,11 @@ class IosMediaLibrary : MediaLibrary, AlbumLibrary by IosAlbums {
     override suspend fun delete(ids: List<String>): DeleteResult {
         if (ids.isEmpty()) return DeleteResult.Deleted(ids = emptyList(), freedBytes = 0)
 
-        val assets = fetchAssets().filter { it.localIdentifier in ids }
+        val (assets, freedBytes) = withContext(Dispatchers.Default) {
+            val found = fetchAssetsById(ids)
+            found to found.sumOf { it.fileSizeBytes() }
+        }
         if (assets.isEmpty()) return DeleteResult.Failed(reason = "assets not found")
-        val freedBytes = assets.sumOf { it.fileSizeBytes() }
 
         return suspendCancellableCoroutine { continuation ->
             PHPhotoLibrary.sharedPhotoLibrary().performChanges(
@@ -135,3 +137,13 @@ class IosMediaLibrary : MediaLibrary, AlbumLibrary by IosAlbums {
 
 private fun PHAsset.hasSubtype(subtype: ULong): Boolean =
     mediaSubtypes.toLong() and subtype.toLong() != 0L
+
+private fun fetchAssetsById(ids: List<String>): List<PHAsset> {
+    if (ids.isEmpty()) return emptyList()
+    val result = PHAsset.fetchAssetsWithLocalIdentifiers(ids, null)
+    return buildList {
+        for (index in 0uL until result.count) {
+            (result.objectAtIndex(index) as? PHAsset)?.let(::add)
+        }
+    }
+}
