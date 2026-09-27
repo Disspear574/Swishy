@@ -34,3 +34,5 @@ fun swipeHint(horizontal: Float, up: Float, moveEnabled: Boolean): SwipeHint {
         else -> SwipeHint(SwipeVerdict.Trash, min(side, 1f))
     }
 }
+
+fun armedVerdict(hint: SwipeHint): SwipeVerdict? = hint.verdict?.takeIf { hint.magnitude >= 1f }
