@@ -13,6 +13,8 @@
     <string name="album_videos">Videos</string>
     <string name="album_live">Live Photos</string>
     <string name="album_favorites">Favourites</string>
+    <string name="album_long_videos">Long videos</string>
+    <string name="album_on_this_day">On this day</string>
     <string name="albums_section">Collections</string>
     <string name="months_section">Months</string>
     <string name="a11y_open_album">Sort collection %1$s, %2$d items</string>

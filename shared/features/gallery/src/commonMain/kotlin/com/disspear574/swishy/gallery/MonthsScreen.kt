@@ -29,6 +29,7 @@ import com.disspear574.swishy.media.MonthKey
 import com.disspear574.swishy.media.UserAlbum
 import com.disspear574.swishy.media.albumSummaries
 import com.disspear574.swishy.media.groupIntoMonths
+import com.disspear574.swishy.media.todayIn
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_open_album
 import com.disspear574.swishy.strings.a11y_open_duplicates
@@ -82,15 +83,16 @@ internal fun MonthsScreen(
     val undecided = remember(scanned, store) {
         scanned.filter { asset -> store.decisionOf(asset.id) == null }
     }
+    val zone = remember { TimeZone.currentSystemDefault() }
     val albums = remember(undecided, sizes) {
         undecided
             .map { asset -> asset.copy(sizeBytes = sizes[asset.id] ?: asset.sizeBytes) }
-            .albumSummaries()
+            .albumSummaries(todayIn(zone), zone)
     }
     val months = remember(undecided, sizes) {
         undecided
             .map { asset -> asset.copy(sizeBytes = sizes[asset.id] ?: asset.sizeBytes) }
-            .groupIntoMonths(TimeZone.currentSystemDefault())
+            .groupIntoMonths(zone)
     }
 
     if (months.isEmpty()) {
