@@ -13,6 +13,7 @@
     <string name="album_videos">Видео</string>
     <string name="album_live">Живые фото</string>
     <string name="album_long_videos">Длинные видео</string>
+    <string name="album_short_videos">Короткие видео</string>
     <string name="album_on_this_day">В этот день</string>
     <string name="album_favorites">Избранное</string>
     <string name="albums_section">Подборки</string>
