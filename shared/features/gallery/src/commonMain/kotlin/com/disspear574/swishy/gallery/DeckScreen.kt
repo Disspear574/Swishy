@@ -56,6 +56,7 @@ import com.disspear574.swishy.media.VideoCard
 import com.disspear574.swishy.media.isIn
 import com.disspear574.swishy.media.monthKeyIn
 import com.disspear574.swishy.media.prefetchMedia
+import com.disspear574.swishy.media.todayIn
 import com.disspear574.swishy.strings.Res
 import com.disspear574.swishy.strings.a11y_back
 import com.disspear574.swishy.strings.album_count
@@ -116,7 +117,10 @@ internal fun DeckScreen(
         val all = scanned ?: return@LaunchedEffect
         val assets = when (source) {
             is DeckSource.Month -> all.filter { it.monthKeyIn(zone) == source.key }
-            is DeckSource.Album -> all.filter { it.isIn(source.kind) }
+            is DeckSource.Album -> {
+                val today = todayIn(zone)
+                all.filter { it.isIn(source.kind, today, zone) }
+            }
             is DeckSource.UserAlbum -> {
                 val byId = all.associateBy { it.id }
                 library.albumAssetIds(source.id).mapNotNull(byId::get)
