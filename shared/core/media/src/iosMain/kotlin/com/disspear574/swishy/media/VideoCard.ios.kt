@@ -1,9 +1,11 @@
 package com.disspear574.swishy.media
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitViewController
@@ -22,22 +24,23 @@ import platform.Foundation.NSNotificationCenter
 import platform.Photos.PHAsset
 import platform.Photos.PHImageManager
 import platform.Photos.PHVideoRequestOptions
+import platform.UIKit.UIColor
 
-@OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun VideoCard(id: String, modifier: Modifier, playing: Boolean) {
-    if (!playing) {
-        StillPhotoCard(id = id, modifier = modifier, preview = false)
-        return
-    }
-
-    // The factory runs once per composition node; without key a new asset kept the old player on screen.
-    key(id) {
-        VideoCardContent(id = id, modifier = modifier)
+    // The poster stays under the player: it shows until the first frame and around a letterboxed one.
+    Box(modifier) {
+        StillPhotoCard(id = id, modifier = Modifier.matchParentSize(), preview = false)
+        if (playing) {
+            // The factory runs once per composition node; without key a new asset kept the old player on screen.
+            key(id) {
+                VideoCardContent(id = id, modifier = Modifier.matchParentSize())
+            }
+        }
     }
 }
 
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun VideoCardContent(id: String, modifier: Modifier) {
     val player = remember(id) { AVPlayer() }
@@ -84,10 +87,11 @@ private fun VideoCardContent(id: String, modifier: Modifier) {
                 this.player = player
                 showsPlaybackControls = false
                 videoGravity = AVLayerVideoGravityResizeAspect
+                view.backgroundColor = UIColor.clearColor
             }
         },
         modifier = modifier,
-        // interactionMode = null makes the view non-interactive, so it cannot swallow the swipe.
-        properties = UIKitInteropProperties(interactionMode = null),
+        // Non-interactive so it cannot swallow the swipe; an overlay so the poster shows through.
+        properties = UIKitInteropProperties(interactionMode = null, placedAsOverlay = true),
     )
 }
